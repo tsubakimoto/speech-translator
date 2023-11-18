@@ -2,14 +2,25 @@
 using Microsoft.CognitiveServices.Speech;
 using Microsoft.CognitiveServices.Speech.Audio;
 using Microsoft.CognitiveServices.Speech.Translation;
+using Microsoft.Extensions.Configuration;
+
+using SpeechTranslatorConsole;
 
 const string directoryName = "recordings";
 
-var region = args[0] ?? throw new ArgumentNullException("region");
-var subscriptionKey = args[1] ?? throw new ArgumentNullException("subscriptionKey");
-var fromLanguage = args[2] ?? throw new ArgumentNullException("fromLanguage");
-var targetLanguage = args[3] ?? throw new ArgumentNullException("targetLanguage");
-var filePath = args[4] ?? throw new ArgumentNullException("filePath");
+IConfigurationRoot config = new ConfigurationBuilder()
+    .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+    .AddEnvironmentVariables()
+    .Build();
+
+Settings? settings = config.GetRequiredSection(nameof(Settings)).Get<Settings>();
+var region = settings?.Region ?? throw new ArgumentNullException("region");
+var subscriptionKey = settings?.SubscriptionKey ?? throw new ArgumentNullException("subscriptionKey");
+var fromLanguage = settings?.FromLanguage ?? throw new ArgumentNullException("fromLanguage");
+var targetLanguage = settings?.TargetLanguage ?? throw new ArgumentNullException("targetLanguage");
+
+Console.Write("Record file name: ");
+var filePath = Console.ReadLine() ?? throw new ArgumentNullException("filePath");
 
 if (!Directory.Exists(directoryName))
 {
