@@ -53,11 +53,9 @@ finally
 
 static async Task MultiLingualTranslation(string filepath, SpeechTranslationConfig config)
 {
-    // var autoDetectSourceLanguageConfig = AutoDetectSourceLanguageConfig.FromLanguages(new string[] { "en-US", "de-DE", "zh-CN" });
-    var autoDetectSourceLanguageConfig = AutoDetectSourceLanguageConfig.FromLanguages(new string[] { "en-US" });
+    var autoDetectSourceLanguageConfig = AutoDetectSourceLanguageConfig.FromLanguages(new string[] { config.SpeechRecognitionLanguage });
 
     var stopTranslation = new TaskCompletionSource<int>();
-    // using (var audioInput = AudioConfig.FromWavFileInput(@"en-us_zh-cn.wav"))
     using (var audioInput = AudioConfig.FromDefaultMicrophoneInput())
     {
         using (var recognizer = new TranslationRecognizer(config, autoDetectSourceLanguageConfig, audioInput))
