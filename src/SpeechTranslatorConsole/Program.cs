@@ -33,14 +33,14 @@ if (!Directory.Exists(directoryName))
 
 var endpointString = $"wss://{region}.stt.speech.microsoft.com/speech/universal/v2";
 var endpointUrl = new Uri(endpointString);
-var speechTranlationConfig = SpeechTranslationConfig.FromEndpoint(endpointUrl, subscriptionKey);
-speechTranlationConfig.SpeechRecognitionLanguage = fromLanguage;
-speechTranlationConfig.AddTargetLanguage(targetLanguage);
-speechTranlationConfig.SetProperty(PropertyId.SpeechServiceConnection_TranslationVoice, "de-DE-Hedda");
+var speechTranslationConfig = SpeechTranslationConfig.FromEndpoint(endpointUrl, subscriptionKey);
+speechTranslationConfig.SpeechRecognitionLanguage = fromLanguage;
+speechTranslationConfig.AddTargetLanguage(targetLanguage);
+speechTranslationConfig.SetProperty(PropertyId.SpeechServiceConnection_TranslationVoice, "de-DE-Hedda");
 
 try
 {
-    await MultiLingualTranslation($"{directoryName}/{filePath}.txt", speechTranlationConfig);
+    await MultiLingualTranslation($"{directoryName}/{filePath}.txt", speechTranslationConfig);
 }
 catch (Exception e)
 {
