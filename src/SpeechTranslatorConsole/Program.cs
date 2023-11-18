@@ -8,8 +8,11 @@ using SpeechTranslatorConsole;
 
 const string directoryName = "recordings";
 
+var environmentName = Environment.GetEnvironmentVariable("DOTNETCORE_ENVIRONMENT") ?? "Development";
+
 IConfigurationRoot config = new ConfigurationBuilder()
     .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+    .AddJsonFile($"appsettings.{environmentName}.json", optional: true, reloadOnChange: true)
     .AddEnvironmentVariables()
     .Build();
 
