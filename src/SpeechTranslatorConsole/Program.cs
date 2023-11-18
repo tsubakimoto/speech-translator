@@ -60,19 +60,24 @@ static async Task MultiLingualTranslation(string filepath, SpeechTranslationConf
     {
         using (var recognizer = new TranslationRecognizer(config, autoDetectSourceLanguageConfig, audioInput))
         {
-            // recognizer.Recognizing += (s, e) =>
-            // {
-            //     var lidResult = e.Result.Properties.GetProperty(PropertyId.SpeechServiceConnection_AutoDetectSourceLanguageResult);
+            recognizer.Recognizing += (s, e) =>
+            {
+                Console.Write(".");
 
-            //     Console.WriteLine($"RECOGNIZING in '{lidResult}': Text={e.Result.Text}");
-            //     foreach (var element in e.Result.Translations)
-            //     {
-            //         Console.WriteLine($"    TRANSLATING into '{element.Key}': {element.Value}");
-            //     }
-            // };
+                //var lidResult = e.Result.Properties.GetProperty(PropertyId.SpeechServiceConnection_AutoDetectSourceLanguageResult);
+
+                //Console.WriteLine($"RECOGNIZING in '{lidResult}': Text={e.Result.Text}");
+                //foreach (var element in e.Result.Translations)
+                //{
+                //    Console.WriteLine($"    TRANSLATING into '{element.Key}': {element.Value}");
+                //}
+            };
 
             recognizer.Recognized += (s, e) =>
             {
+                Console.WriteLine();
+                Console.WriteLine();
+
                 if (e.Result.Reason == ResultReason.TranslatedSpeech)
                 {
                     var sw = new StreamWriter(filepath, true, Encoding.UTF8);
@@ -92,15 +97,15 @@ static async Task MultiLingualTranslation(string filepath, SpeechTranslationConf
                     sw.WriteLine();
                     sw.Close();
                 }
-                // else if (e.Result.Reason == ResultReason.RecognizedSpeech)
-                // {
-                //     Console.WriteLine($"RECOGNIZED: Text={e.Result.Text}");
-                //     Console.WriteLine($"    Speech not translated.");
-                // }
-                // else if (e.Result.Reason == ResultReason.NoMatch)
-                // {
-                //     Console.WriteLine($"NOMATCH: Speech could not be recognized.");
-                // }
+                else if (e.Result.Reason == ResultReason.RecognizedSpeech)
+                {
+                    Console.WriteLine($"RECOGNIZED: Text={e.Result.Text}");
+                    Console.WriteLine($"    Speech not translated.");
+                }
+                else if (e.Result.Reason == ResultReason.NoMatch)
+                {
+                    Console.WriteLine($"NOMATCH: Speech could not be recognized.");
+                }
 
                 Console.WriteLine();
             };
@@ -117,32 +122,38 @@ static async Task MultiLingualTranslation(string filepath, SpeechTranslationConf
                 }
 
                 stopTranslation.TrySetResult(0);
+                Console.WriteLine();
             };
 
             recognizer.SpeechStartDetected += (s, e) =>
             {
                 Console.WriteLine("\nSpeech start detected event.");
+                Console.WriteLine();
             };
 
             recognizer.SpeechEndDetected += (s, e) =>
             {
                 Console.WriteLine("\nSpeech end detected event.");
+                Console.WriteLine();
             };
 
             recognizer.SessionStarted += (s, e) =>
             {
                 Console.WriteLine("\nSession started event.");
+                Console.WriteLine();
             };
 
             recognizer.SessionStopped += (s, e) =>
             {
                 Console.WriteLine("\nSession stopped event.");
                 Console.WriteLine($"\nStop translation.");
+                Console.WriteLine();
                 stopTranslation.TrySetResult(0);
             };
 
             // Starts continuous recognition. Uses StopContinuousRecognitionAsync() to stop recognition.
             Console.WriteLine("Start translation...");
+            Console.WriteLine();
             await recognizer.StartContinuousRecognitionAsync().ConfigureAwait(false);
 
             Task.WaitAny(new[] { stopTranslation.Task });
