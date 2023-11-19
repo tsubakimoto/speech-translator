@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "SpeechTranslatorConsole": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "DOTNETCORE_ENVIRONMENT": "Development"
+      }
+    }
+  }
+}
