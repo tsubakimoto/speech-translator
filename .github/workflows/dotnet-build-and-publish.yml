@@ -19,8 +19,8 @@ jobs:
     - name: Restore dependencies
       run: dotnet restore
     - name: Build
-      run: dotnet build --no-restore --configuration Release
+      run: dotnet build --no-restore
     - name: Test
       run: dotnet test --no-build --verbosity normal
     - name: Publish
-      run: dotnet publish --no-build --configuration Release --runtime win-x64 -p:PublishSingleFile=true --self-contained true --output ${{ env.DOTNET_ROOT }}/consoleapp
+      run: dotnet publish --no-build --configuration Release --runtime win-x64 -p:PublishSingleFile=true --self-contained true
