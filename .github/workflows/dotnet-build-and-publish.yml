@@ -19,6 +19,8 @@ jobs:
     - name: Restore dependencies
       run: dotnet restore
     - name: Build
-      run: dotnet build --no-restore --runtime win-x64
+      run: dotnet build --no-restore --runtime win-x64 --configuration Release
     - name: Test
       run: dotnet test --no-build --verbosity normal
+    - name: Publish
+      run: dotnet publish --no-build --runtime win-x64 --configuration Release --output ${{ env.DOTNET_ROOT }}/consoleapp
