@@ -9,7 +9,7 @@ on:
 
 jobs:
   build:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
     - name: Setup .NET
@@ -17,11 +17,10 @@ jobs:
       with:
         global-json-file: global.json
     - name: Restore dependencies
-      run: dotnet restore
+      run: dotnet restore --runtime win-x64
     - name: Build
       run: dotnet build --no-restore
     - name: Test
       run: dotnet test --no-build --verbosity normal
     - name: Publish
       run: dotnet publish --no-build --configuration Release --runtime win-x64 -p:PublishSingleFile=true --self-contained true
-      working-directory: ./src/SpeechTranslatorConsole
