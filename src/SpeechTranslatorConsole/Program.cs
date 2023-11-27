@@ -19,8 +19,10 @@ IConfigurationRoot config = new ConfigurationBuilder()
 Settings? settings = config.GetRequiredSection(nameof(Settings)).Get<Settings>();
 var region = settings?.Region ?? throw new ArgumentNullException("region");
 var subscriptionKey = settings?.SubscriptionKey ?? throw new ArgumentNullException("subscriptionKey");
-var fromLanguage = settings?.FromLanguage ?? throw new ArgumentNullException("fromLanguage");
-var targetLanguage = settings?.TargetLanguage ?? throw new ArgumentNullException("targetLanguage");
+var fromLanguage = DetermineLanguage("speaker") ?? throw new ArgumentNullException("fromLanguage");
+Console.WriteLine();
+var targetLanguage = DetermineLanguage("translator") ?? throw new ArgumentNullException("targetLanguage");
+Console.WriteLine();
 
 Console.Write("Record file name: ");
 var filePath = Console.ReadLine() ?? throw new ArgumentNullException("filePath");
@@ -49,6 +51,20 @@ catch (Exception e)
 finally
 {
     Console.WriteLine("Executing finally block.");
+}
+
+static string? DetermineLanguage(string title)
+{
+    Console.WriteLine("1. English (en-US)");
+    Console.WriteLine("2. Japanese (ja-JP)");
+    Console.Write($"Select {title} language: ");
+
+    return Console.ReadLine() switch
+    {
+        "1" => "en-US",
+        "2" => "ja-JP",
+        _ => null
+    };
 }
 
 static async Task MultiLingualTranslation(string filepath, SpeechTranslationConfig config)
