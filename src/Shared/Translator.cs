@@ -13,17 +13,17 @@ public class Translator
             throw new ArgumentNullException(nameof(endpointUrl));
         }
 
-        if (string.IsNullOrEmpty(subscriptionKey))
+        if (string.IsNullOrWhiteSpace(subscriptionKey))
         {
             throw new ArgumentException($"'{nameof(subscriptionKey)}' を NULL または空にすることはできません。", nameof(subscriptionKey));
         }
 
-        if (string.IsNullOrEmpty(recognitionLanguage))
+        if (string.IsNullOrWhiteSpace(recognitionLanguage))
         {
             throw new ArgumentException($"'{nameof(recognitionLanguage)}' を NULL または空にすることはできません。", nameof(recognitionLanguage));
         }
 
-        if (string.IsNullOrEmpty(targetLanguage))
+        if (string.IsNullOrWhiteSpace(targetLanguage))
         {
             throw new ArgumentException($"'{nameof(targetLanguage)}' を NULL または空にすることはできません。", nameof(targetLanguage));
         }
