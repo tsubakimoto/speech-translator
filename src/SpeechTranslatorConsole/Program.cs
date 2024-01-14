@@ -1,10 +1,12 @@
 ﻿using System.Text;
+
 using Microsoft.CognitiveServices.Speech;
 using Microsoft.CognitiveServices.Speech.Audio;
 using Microsoft.CognitiveServices.Speech.Translation;
 using Microsoft.Extensions.Configuration;
 
 using Shared;
+
 using SpeechTranslatorConsole;
 
 const string directoryName = "recordings";
@@ -19,6 +21,7 @@ IConfigurationRoot config = new ConfigurationBuilder()
 
 Settings? settings = config.GetRequiredSection(nameof(Settings)).Get<Settings>();
 var region = settings?.Region ?? throw new ArgumentNullException("region");
+var endpointUrl = new Uri($"wss://{region}.stt.speech.microsoft.com/speech/universal/v2");
 var subscriptionKey = settings?.SubscriptionKey ?? throw new ArgumentNullException("subscriptionKey");
 var fromLanguage = DetermineLanguage("speaker") ?? throw new ArgumentNullException("fromLanguage");
 Console.WriteLine();
@@ -34,15 +37,13 @@ if (!Directory.Exists(directoryName))
     Console.WriteLine("The directory was created successfully at {0}.", Directory.GetCreationTime(directoryName));
 }
 
-var endpointString = $"wss://{region}.stt.speech.microsoft.com/speech/universal/v2";
-var endpointUrl = new Uri(endpointString);
 var translator = new Translator(endpointUrl, subscriptionKey, fromLanguage, targetLanguage);
+translator.RecognizingAction = e => Console.Write(".");
+translator.RecognizedAction = e => Output(e.Result, $"{directoryName}/{filePath}.txt");
 
 try
 {
-    await translator.MultiLingualTranslation(
-        $"{directoryName}/{filePath}.txt",
-        value => Console.WriteLine(value));
+    await translator.MultiLingualTranslation(value => Console.WriteLine(value));
 }
 catch (Exception e)
 {
@@ -65,6 +66,41 @@ static string? DetermineLanguage(string title)
         "2" => "ja-JP",
         _ => null
     };
+}
+
+static void Output(TranslationRecognitionResult result, string filePath)
+{
+    Console.WriteLine();
+    Console.WriteLine();
+
+    if (result.Reason == ResultReason.TranslatedSpeech)
+    {
+        using (var sw = new StreamWriter(filePath, true, Encoding.UTF8))
+        {
+            var lidResult = result.Properties.GetProperty(PropertyId.SpeechServiceConnection_AutoDetectSourceLanguageResult);
+
+            Console.WriteLine($"{result.Text}");
+            sw.WriteLine($"{result.Text}");
+            foreach (var element in result.Translations)
+            {
+                Console.WriteLine($"{element.Value}");
+                sw.WriteLine($"{element.Value}");
+            }
+
+            sw.WriteLine();
+        }
+    }
+    else if (result.Reason == ResultReason.RecognizedSpeech)
+    {
+        Console.WriteLine($"RECOGNIZED: Text={result.Text}");
+        Console.WriteLine($"    Speech not translated.");
+    }
+    else if (result.Reason == ResultReason.NoMatch)
+    {
+        Console.WriteLine($"NOMATCH: Speech could not be recognized.");
+    }
+
+    Console.WriteLine();
 }
 
 static async Task MultiLingualTranslation(string filepath, SpeechTranslationConfig config)

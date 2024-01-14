@@ -10,6 +10,10 @@ public class Translator
 {
     private readonly SpeechTranslationConfig _speechTranslationConfig;
 
+    public Action<TranslationRecognitionEventArgs> RecognizingAction { get; set; }
+
+    public Action<TranslationRecognitionEventArgs> RecognizedAction { get; set; }
+
     public Translator(Uri endpointUrl, string subscriptionKey, string recognitionLanguage = "en-US", string targetLanguage = "ja-JP")
     {
         if (endpointUrl is null)
@@ -38,7 +42,7 @@ public class Translator
         _speechTranslationConfig.SetProperty(PropertyId.SpeechServiceConnection_TranslationVoice, "de-DE-Hedda");
     }
 
-    public async Task MultiLingualTranslation(string filepath, Action<string> outputAction)
+    public async Task MultiLingualTranslation(Action<string> outputAction)
     {
         var autoDetectSourceLanguageConfig = AutoDetectSourceLanguageConfig.FromLanguages([_speechTranslationConfig.SpeechRecognitionLanguage]);
         var stopTranslation = new TaskCompletionSource<int>();
@@ -47,41 +51,20 @@ public class Translator
         {
             using (var recognizer = new TranslationRecognizer(_speechTranslationConfig, autoDetectSourceLanguageConfig, audioInput))
             {
-                recognizer.Recognizing += (s, e) => outputAction(".");
+                recognizer.Recognizing += (s, e) =>
+                {
+                    if (RecognizingAction is not null)
+                    {
+                        RecognizingAction(e);
+                    }
+                };
 
                 recognizer.Recognized += (s, e) =>
                 {
-                    outputAction(string.Empty);
-                    outputAction(string.Empty);
-
-                    if (e.Result.Reason == ResultReason.TranslatedSpeech)
+                    if (RecognizedAction is not null)
                     {
-                        var sw = new StreamWriter(filepath, true, Encoding.UTF8);
-
-                        var lidResult = e.Result.Properties.GetProperty(PropertyId.SpeechServiceConnection_AutoDetectSourceLanguageResult);
-
-                        outputAction($"{e.Result.Text}");
-                        sw.WriteLine($"{e.Result.Text}");
-                        foreach (var element in e.Result.Translations)
-                        {
-                            outputAction($"{element.Value}");
-                            sw.WriteLine($"{element.Value}");
-                        }
-
-                        sw.WriteLine();
-                        sw.Close();
+                        RecognizedAction(e);
                     }
-                    else if (e.Result.Reason == ResultReason.RecognizedSpeech)
-                    {
-                        outputAction($"RECOGNIZED: Text={e.Result.Text}");
-                        outputAction($"    Speech not translated.");
-                    }
-                    else if (e.Result.Reason == ResultReason.NoMatch)
-                    {
-                        outputAction($"NOMATCH: Speech could not be recognized.");
-                    }
-
-                    outputAction(string.Empty);
                 };
 
                 recognizer.Canceled += (s, e) =>
