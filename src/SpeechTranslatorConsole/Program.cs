@@ -4,6 +4,7 @@ using Microsoft.CognitiveServices.Speech.Audio;
 using Microsoft.CognitiveServices.Speech.Translation;
 using Microsoft.Extensions.Configuration;
 
+using Shared;
 using SpeechTranslatorConsole;
 
 const string directoryName = "recordings";
@@ -35,14 +36,13 @@ if (!Directory.Exists(directoryName))
 
 var endpointString = $"wss://{region}.stt.speech.microsoft.com/speech/universal/v2";
 var endpointUrl = new Uri(endpointString);
-var speechTranslationConfig = SpeechTranslationConfig.FromEndpoint(endpointUrl, subscriptionKey);
-speechTranslationConfig.SpeechRecognitionLanguage = fromLanguage;
-speechTranslationConfig.AddTargetLanguage(targetLanguage);
-speechTranslationConfig.SetProperty(PropertyId.SpeechServiceConnection_TranslationVoice, "de-DE-Hedda");
+var translator = new Translator(endpointUrl, subscriptionKey, fromLanguage, targetLanguage);
 
 try
 {
-    await MultiLingualTranslation($"{directoryName}/{filePath}.txt", speechTranslationConfig);
+    await translator.MultiLingualTranslation(
+        $"{directoryName}/{filePath}.txt",
+        value => Console.WriteLine(value));
 }
 catch (Exception e)
 {
