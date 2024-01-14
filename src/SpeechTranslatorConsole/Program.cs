@@ -1,9 +1,4 @@
-﻿using System.Text;
-
-using Microsoft.CognitiveServices.Speech;
-using Microsoft.CognitiveServices.Speech.Audio;
-using Microsoft.CognitiveServices.Speech.Translation;
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 
 using Shared;
 
@@ -30,6 +25,7 @@ Console.WriteLine();
 
 Console.Write("Record file name: ");
 var filePath = Console.ReadLine() ?? throw new ArgumentNullException("filePath");
+Console.WriteLine();
 
 if (!Directory.Exists(directoryName))
 {
@@ -38,12 +34,11 @@ if (!Directory.Exists(directoryName))
 }
 
 var translator = new Translator(endpointUrl, subscriptionKey, fromLanguage, targetLanguage);
-translator.RecognizingAction = e => Console.Write(".");
-translator.RecognizedAction = e => Output(e.Result, $"{directoryName}/{filePath}.txt");
+var worker = new TranslationRecognizerWorker($"{directoryName}/{filePath}.txt");
 
 try
 {
-    await translator.MultiLingualTranslation(value => Console.WriteLine(value));
+    await translator.MultiLingualTranslation(worker);
 }
 catch (Exception e)
 {
@@ -66,150 +61,4 @@ static string? DetermineLanguage(string title)
         "2" => "ja-JP",
         _ => null
     };
-}
-
-static void Output(TranslationRecognitionResult result, string filePath)
-{
-    Console.WriteLine();
-    Console.WriteLine();
-
-    if (result.Reason == ResultReason.TranslatedSpeech)
-    {
-        using (var sw = new StreamWriter(filePath, true, Encoding.UTF8))
-        {
-            var lidResult = result.Properties.GetProperty(PropertyId.SpeechServiceConnection_AutoDetectSourceLanguageResult);
-
-            Console.WriteLine($"{result.Text}");
-            sw.WriteLine($"{result.Text}");
-            foreach (var element in result.Translations)
-            {
-                Console.WriteLine($"{element.Value}");
-                sw.WriteLine($"{element.Value}");
-            }
-
-            sw.WriteLine();
-        }
-    }
-    else if (result.Reason == ResultReason.RecognizedSpeech)
-    {
-        Console.WriteLine($"RECOGNIZED: Text={result.Text}");
-        Console.WriteLine($"    Speech not translated.");
-    }
-    else if (result.Reason == ResultReason.NoMatch)
-    {
-        Console.WriteLine($"NOMATCH: Speech could not be recognized.");
-    }
-
-    Console.WriteLine();
-}
-
-static async Task MultiLingualTranslation(string filepath, SpeechTranslationConfig config)
-{
-    var autoDetectSourceLanguageConfig = AutoDetectSourceLanguageConfig.FromLanguages(new string[] { config.SpeechRecognitionLanguage });
-
-    var stopTranslation = new TaskCompletionSource<int>();
-    using (var audioInput = AudioConfig.FromDefaultMicrophoneInput())
-    {
-        using (var recognizer = new TranslationRecognizer(config, autoDetectSourceLanguageConfig, audioInput))
-        {
-            recognizer.Recognizing += (s, e) =>
-            {
-                Console.Write(".");
-
-                //var lidResult = e.Result.Properties.GetProperty(PropertyId.SpeechServiceConnection_AutoDetectSourceLanguageResult);
-
-                //Console.WriteLine($"RECOGNIZING in '{lidResult}': Text={e.Result.Text}");
-                //foreach (var element in e.Result.Translations)
-                //{
-                //    Console.WriteLine($"    TRANSLATING into '{element.Key}': {element.Value}");
-                //}
-            };
-
-            recognizer.Recognized += (s, e) =>
-            {
-                Console.WriteLine();
-                Console.WriteLine();
-
-                if (e.Result.Reason == ResultReason.TranslatedSpeech)
-                {
-                    var sw = new StreamWriter(filepath, true, Encoding.UTF8);
-
-                    var lidResult = e.Result.Properties.GetProperty(PropertyId.SpeechServiceConnection_AutoDetectSourceLanguageResult);
-
-                    // Console.WriteLine($"RECOGNIZED in '{lidResult}': Text={e.Result.Text}");
-                    Console.WriteLine($"{e.Result.Text}");
-                    sw.WriteLine($"{e.Result.Text}");
-                    foreach (var element in e.Result.Translations)
-                    {
-                        // Console.WriteLine($"    TRANSLATED into '{element.Key}': {element.Value}");
-                        Console.WriteLine($"{element.Value}");
-                        sw.WriteLine($"{element.Value}");
-                    }
-
-                    sw.WriteLine();
-                    sw.Close();
-                }
-                else if (e.Result.Reason == ResultReason.RecognizedSpeech)
-                {
-                    Console.WriteLine($"RECOGNIZED: Text={e.Result.Text}");
-                    Console.WriteLine($"    Speech not translated.");
-                }
-                else if (e.Result.Reason == ResultReason.NoMatch)
-                {
-                    Console.WriteLine($"NOMATCH: Speech could not be recognized.");
-                }
-
-                Console.WriteLine();
-            };
-
-            recognizer.Canceled += (s, e) =>
-            {
-                Console.WriteLine($"CANCELED: Reason={e.Reason}");
-
-                if (e.Reason == CancellationReason.Error)
-                {
-                    Console.WriteLine($"CANCELED: ErrorCode={e.ErrorCode}");
-                    Console.WriteLine($"CANCELED: ErrorDetails={e.ErrorDetails}");
-                    Console.WriteLine($"CANCELED: Did you set the speech resource key and region values?");
-                }
-
-                stopTranslation.TrySetResult(0);
-                Console.WriteLine();
-            };
-
-            recognizer.SpeechStartDetected += (s, e) =>
-            {
-                Console.WriteLine("\nSpeech start detected event.");
-                Console.WriteLine();
-            };
-
-            recognizer.SpeechEndDetected += (s, e) =>
-            {
-                Console.WriteLine("\nSpeech end detected event.");
-                Console.WriteLine();
-            };
-
-            recognizer.SessionStarted += (s, e) =>
-            {
-                Console.WriteLine("\nSession started event.");
-                Console.WriteLine();
-            };
-
-            recognizer.SessionStopped += (s, e) =>
-            {
-                Console.WriteLine("\nSession stopped event.");
-                Console.WriteLine($"\nStop translation.");
-                Console.WriteLine();
-                stopTranslation.TrySetResult(0);
-            };
-
-            // Starts continuous recognition. Uses StopContinuousRecognitionAsync() to stop recognition.
-            Console.WriteLine("Start translation...");
-            Console.WriteLine();
-            await recognizer.StartContinuousRecognitionAsync().ConfigureAwait(false);
-
-            Task.WaitAny(new[] { stopTranslation.Task });
-            await recognizer.StopContinuousRecognitionAsync().ConfigureAwait(false);
-        }
-    }
 }

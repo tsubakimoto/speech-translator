@@ -1,6 +1,4 @@
-﻿using System.Text;
-
-using Microsoft.CognitiveServices.Speech;
+﻿using Microsoft.CognitiveServices.Speech;
 using Microsoft.CognitiveServices.Speech.Audio;
 using Microsoft.CognitiveServices.Speech.Translation;
 
@@ -9,10 +7,6 @@ namespace Shared;
 public class Translator
 {
     private readonly SpeechTranslationConfig _speechTranslationConfig;
-
-    public Action<TranslationRecognitionEventArgs> RecognizingAction { get; set; }
-
-    public Action<TranslationRecognitionEventArgs> RecognizedAction { get; set; }
 
     public Translator(Uri endpointUrl, string subscriptionKey, string recognitionLanguage = "en-US", string targetLanguage = "ja-JP")
     {
@@ -42,66 +36,46 @@ public class Translator
         _speechTranslationConfig.SetProperty(PropertyId.SpeechServiceConnection_TranslationVoice, "de-DE-Hedda");
     }
 
-    public async Task MultiLingualTranslation(Action<string> outputAction)
+    public async Task MultiLingualTranslation(TranslationRecognizerWorkerBase worker)
     {
+        if (worker is null)
+        {
+            throw new ArgumentNullException(nameof(worker));
+        }
+
         var autoDetectSourceLanguageConfig = AutoDetectSourceLanguageConfig.FromLanguages([_speechTranslationConfig.SpeechRecognitionLanguage]);
         var stopTranslation = new TaskCompletionSource<int>();
 
         using (var audioInput = AudioConfig.FromDefaultMicrophoneInput())
+        using (var recognizer = new TranslationRecognizer(_speechTranslationConfig, autoDetectSourceLanguageConfig, audioInput))
         {
-            using (var recognizer = new TranslationRecognizer(_speechTranslationConfig, autoDetectSourceLanguageConfig, audioInput))
+            recognizer.Recognizing += (s, e) => worker.OnRecognizing(e);
+
+            recognizer.Recognized += (s, e) => worker.OnRecognized(e);
+
+            recognizer.Canceled += (s, e) =>
             {
-                recognizer.Recognizing += (s, e) =>
-                {
-                    if (RecognizingAction is not null)
-                    {
-                        RecognizingAction(e);
-                    }
-                };
+                stopTranslation.TrySetResult(0);
+                worker.OnCanceled(e);
+            };
 
-                recognizer.Recognized += (s, e) =>
-                {
-                    if (RecognizedAction is not null)
-                    {
-                        RecognizedAction(e);
-                    }
-                };
+            recognizer.SpeechStartDetected += (s, e) => worker.OnSpeechStartDetected(e);
 
-                recognizer.Canceled += (s, e) =>
-                {
-                    outputAction($"CANCELED: Reason={e.Reason}");
+            recognizer.SpeechEndDetected += (s, e) => worker.OnSpeechEndDetected(e);
 
-                    if (e.Reason == CancellationReason.Error)
-                    {
-                        outputAction($"CANCELED: ErrorCode={e.ErrorCode}");
-                        outputAction($"CANCELED: ErrorDetails={e.ErrorDetails}");
-                        outputAction($"CANCELED: Did you set the speech resource key and region values?");
-                    }
+            recognizer.SessionStarted += (s, e) => worker.OnSessionStarted(e);
 
-                    stopTranslation.TrySetResult(0);
-                    outputAction(string.Empty);
-                };
+            recognizer.SessionStopped += (s, e) =>
+            {
+                stopTranslation.TrySetResult(0);
+                worker.OnSessionStopped(e);
+            };
 
-                recognizer.SpeechStartDetected += (s, e) => outputAction("Speech start detected event.");
+            // Starts continuous recognition. Uses StopContinuousRecognitionAsync() to stop recognition.
+            await recognizer.StartContinuousRecognitionAsync().ConfigureAwait(false);
 
-                recognizer.SpeechEndDetected += (s, e) => outputAction("Speech end detected event.");
-
-                recognizer.SessionStarted += (s, e) => outputAction("Session started event.");
-
-                recognizer.SessionStopped += (s, e) =>
-                {
-                    outputAction("Session stopped event.");
-                    outputAction("Stop translation.");
-                    stopTranslation.TrySetResult(0);
-                };
-
-                // Starts continuous recognition. Uses StopContinuousRecognitionAsync() to stop recognition.
-                outputAction("Start translation...");
-                await recognizer.StartContinuousRecognitionAsync().ConfigureAwait(false);
-
-                Task.WaitAny(new[] { stopTranslation.Task });
-                await recognizer.StopContinuousRecognitionAsync().ConfigureAwait(false);
-            }
+            Task.WaitAny(new[] { stopTranslation.Task });
+            await recognizer.StopContinuousRecognitionAsync().ConfigureAwait(false);
         }
     }
 }
