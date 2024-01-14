@@ -28,7 +28,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Shared\Shared.csproj" />
+    <ProjectReference Include="..\..\src\Shared\SpeechTranslatorShared.csproj" />
   </ItemGroup>
 
 </Project>

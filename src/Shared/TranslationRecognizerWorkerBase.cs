@@ -1,7 +1,7 @@
 ﻿using Microsoft.CognitiveServices.Speech;
 using Microsoft.CognitiveServices.Speech.Translation;
 
-namespace Shared;
+namespace SpeechTranslatorShared;
 
 public abstract class TranslationRecognizerWorkerBase
 {

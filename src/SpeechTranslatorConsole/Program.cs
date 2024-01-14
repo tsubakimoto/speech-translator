@@ -1,8 +1,8 @@
 ﻿using Microsoft.Extensions.Configuration;
 
-using Shared;
-
 using SpeechTranslatorConsole;
+
+using SpeechTranslatorShared;
 
 const string directoryName = "recordings";
 

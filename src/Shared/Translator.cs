@@ -2,7 +2,7 @@
 using Microsoft.CognitiveServices.Speech.Audio;
 using Microsoft.CognitiveServices.Speech.Translation;
 
-namespace Shared;
+namespace SpeechTranslatorShared;
 
 public class Translator
 {

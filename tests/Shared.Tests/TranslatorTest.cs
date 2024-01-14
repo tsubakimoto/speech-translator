@@ -1,6 +1,4 @@
-using FluentAssertions;
-
-namespace Shared.Tests;
+namespace SpeechTranslatorShared.Tests;
 
 public class TranslatorTest
 {

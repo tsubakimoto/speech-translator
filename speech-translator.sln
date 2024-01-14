@@ -16,11 +16,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ソリューション項目
 		README.md = README.md
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shared", "src\Shared\Shared.csproj", "{FF0262A4-994A-4237-88E4-1049E03E85D3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SpeechTranslatorShared", "src\Shared\SpeechTranslatorShared.csproj", "{FF0262A4-994A-4237-88E4-1049E03E85D3}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{00192D0A-A300-4EA4-A6BA-D193D73004D5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shared.Tests", "tests\Shared.Tests\Shared.Tests.csproj", "{EA08923B-519F-40CB-B219-4826FE0954F2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SpeechTranslatorShared.Tests", "tests\Shared.Tests\SpeechTranslatorShared.Tests.csproj", "{EA08923B-519F-40CB-B219-4826FE0954F2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -3,7 +3,7 @@
 using Microsoft.CognitiveServices.Speech;
 using Microsoft.CognitiveServices.Speech.Translation;
 
-using Shared;
+using SpeechTranslatorShared;
 
 namespace SpeechTranslatorConsole;
 
