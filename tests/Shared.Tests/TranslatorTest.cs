@@ -5,11 +5,7 @@ public class TranslatorTest
     [Fact]
     public void Constructor1()
     {
-        var actual = new Translator(
-            new Uri("https://example.com"),
-            "test",
-            "en-US",
-            "ja-JP");
+        Translator actual = CreateTranslator();
 
         actual.Should().NotBeNull();
     }
@@ -57,5 +53,23 @@ public class TranslatorTest
             targetLanguage);
 
         action.Should().Throw<ArgumentException>();
+    }
+
+    [Fact]
+    public void MultiLingualTranslation_NullWorker()
+    {
+        var translator = CreateTranslator();
+        var action = () => translator.MultiLingualTranslation(null);
+
+        action.Should().ThrowAsync<ArgumentNullException>();
+    }
+
+    private static Translator CreateTranslator()
+    {
+        return new Translator(
+            new Uri("https://example.com"),
+            "test",
+            "en-US",
+            "ja-JP");
     }
 }

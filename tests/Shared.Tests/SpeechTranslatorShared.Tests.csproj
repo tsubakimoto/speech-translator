@@ -10,7 +10,7 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <NoWarn>xUnit1012</NoWarn>    
+    <NoWarn>xUnit1012;8625</NoWarn>
   </PropertyGroup>
     
   <ItemGroup>
