@@ -1,11 +1,4 @@
-﻿using System.Text;
-
-using Microsoft.CognitiveServices.Speech;
-using Microsoft.CognitiveServices.Speech.Translation;
-
-using SpeechTranslatorShared;
-
-namespace SpeechTranslatorConsole;
+﻿namespace SpeechTranslatorConsole;
 
 internal class TranslationRecognizerWorker : TranslationRecognizerWorkerBase
 {

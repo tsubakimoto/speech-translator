@@ -1,10 +1,4 @@
-﻿using Microsoft.Extensions.Configuration;
-
-using SpeechTranslatorConsole;
-
-using SpeechTranslatorShared;
-
-const string directoryName = "recordings";
+﻿const string directoryName = "recordings";
 
 var environmentName = Environment.GetEnvironmentVariable("DOTNETCORE_ENVIRONMENT") ?? "Development";
 
