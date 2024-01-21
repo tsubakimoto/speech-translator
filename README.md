@@ -1,5 +1,5 @@
 # Speech Translator
-This app is speech translator and recoder using [Azure AI Speech](https://azure.microsoft.com/en-us/products/ai-services/ai-speech).
+This app is speech translator and recorder using [Azure AI Speech](https://azure.microsoft.com/en-us/products/ai-services/ai-speech).
 
 ## Prerequisites
 
