@@ -1,5 +1,5 @@
 # Speech Translator
-This app is speech translator and recoder using [Azure AI Speech](https://azure.microsoft.com/en-us/products/ai-services/ai-speech).
+This app is speech translator and recorder using [Azure AI Speech](https://azure.microsoft.com/en-us/products/ai-services/ai-speech).
 
 ## Prerequisites
 
@@ -7,7 +7,7 @@ This app is speech translator and recoder using [Azure AI Speech](https://azure.
 
 ## How to use
 
-1. Create Azure AI Speech resource.
+1. Create Azure AI Speech resource. ([Bicep](./infra/main.bicep))
 2. Copy `Subscription Key` and `Region` from Azure Portal.
 3. Clone this repository.
 4. Create `src/SpeechTranslatorConsole/appsettings.Development.json`.
