@@ -1,4 +1,4 @@
-﻿const string directoryName = "recordings";
+const string directoryName = "recordings";
 
 var environmentName = Environment.GetEnvironmentVariable("DOTNETCORE_ENVIRONMENT") ?? "Development";
 
@@ -17,9 +17,16 @@ Console.WriteLine();
 var targetLanguage = DetermineLanguage("translator") ?? throw new ArgumentNullException("targetLanguage");
 Console.WriteLine();
 
-Console.Write("Record file name: ");
-var filePath = Console.ReadLine() ?? throw new ArgumentNullException("filePath");
-Console.WriteLine();
+Console.Write("Record file name (If it's not entered, it won't record.): ");
+var fileName = Console.ReadLine() ?? string.Empty;
+if (string.IsNullOrWhiteSpace(fileName))
+{
+    Console.WriteLine("Not record.");
+}
+else
+{
+    Console.WriteLine();
+}
 
 if (!Directory.Exists(directoryName))
 {
@@ -28,7 +35,7 @@ if (!Directory.Exists(directoryName))
 }
 
 var translator = new Translator(endpointUrl, subscriptionKey, fromLanguage, targetLanguage);
-var worker = new TranslationRecognizerWorker($"{directoryName}/{filePath}.txt");
+var worker = new TranslationRecognizerWorker(directoryName, fileName);
 
 try
 {

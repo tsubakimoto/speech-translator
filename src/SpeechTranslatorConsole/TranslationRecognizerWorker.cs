@@ -1,17 +1,14 @@
-﻿namespace SpeechTranslatorConsole;
+namespace SpeechTranslatorConsole;
 
 internal class TranslationRecognizerWorker : TranslationRecognizerWorkerBase
 {
+    private readonly bool _toRecord = false;
     private readonly string _filePath;
 
-    public TranslationRecognizerWorker(string filePath)
+    public TranslationRecognizerWorker(string directoryName, string fileName)
     {
-        if (string.IsNullOrWhiteSpace(filePath))
-        {
-            throw new ArgumentException($"'{nameof(filePath)}' を null または空白にすることはできません。", nameof(filePath));
-        }
-
-        _filePath = filePath;
+        _toRecord = !string.IsNullOrWhiteSpace(fileName);
+        _filePath = $"{directoryName}/{fileName}.txt";
     }
 
     public override void OnRecognizing(TranslationRecognitionEventArgs e) => Console.Write(".");
@@ -22,22 +19,29 @@ internal class TranslationRecognizerWorker : TranslationRecognizerWorkerBase
         Console.WriteLine();
 
         var result = e.Result;
-
         if (result.Reason == ResultReason.TranslatedSpeech)
         {
-            using (var sw = new StreamWriter(_filePath, true, Encoding.UTF8))
+            if (_toRecord)
             {
-                var lidResult = result.Properties.GetProperty(PropertyId.SpeechServiceConnection_AutoDetectSourceLanguageResult);
-
                 Console.WriteLine($"{result.Text}");
-                sw.WriteLine($"{result.Text}");
                 foreach (var element in result.Translations)
                 {
                     Console.WriteLine($"{element.Value}");
-                    sw.WriteLine($"{element.Value}");
                 }
-
-                sw.WriteLine();
+            }
+            else
+            {
+                using (var sw = new StreamWriter(_filePath, true, Encoding.UTF8))
+                {
+                    Console.WriteLine($"{result.Text}");
+                    sw.WriteLine($"{result.Text}");
+                    foreach (var element in result.Translations)
+                    {
+                        Console.WriteLine($"{element.Value}");
+                        sw.WriteLine($"{element.Value}");
+                    }
+                    sw.WriteLine();
+                }
             }
         }
         else if (result.Reason == ResultReason.RecognizedSpeech)
