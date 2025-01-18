@@ -29,7 +29,7 @@ public class Translator
         _speechTranslationConfig = SpeechTranslationConfig.FromEndpoint(endpointUrl, subscriptionKey);
         _speechTranslationConfig.SpeechRecognitionLanguage = recognitionLanguage;
         _speechTranslationConfig.AddTargetLanguage(targetLanguage);
-        _speechTranslationConfig.SetProperty(PropertyId.SpeechServiceConnection_TranslationVoice, "de-DE-Hedda");
+        _speechTranslationConfig.SetProperty(PropertyId.SpeechServiceConnection_TranslationVoice, "en-US-JennyNeural");
     }
 
     public async Task MultiLingualTranslation(TranslationRecognizerWorkerBase worker)
