@@ -17,4 +17,9 @@ public partial class MainWindow : Window
     {
         MessageBox.Show($"Translating from {Speaker.Value} to {Translation.Value}");
     }
+
+    public void Stop()
+    {
+        MessageBox.Show("Stopping");
+    }
 }

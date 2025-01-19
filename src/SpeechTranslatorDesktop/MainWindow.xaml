@@ -24,12 +24,16 @@
     <StackPanel Margin="10">
         <StackPanel Orientation="Horizontal">
             <Button Content="Translate"
-                    Width="100"
-                    Margin="0,0,20,0"
+                    Width="80"
+                    Margin="0,0,10,0"
                     Command="{local:Invoke Translate}"/>
 
-            <Label Content="Speaker"/>
+            <Button Content="Stop"
+                    Width="80"
+                    Margin="0,0,10,0"
+                    Command="{local:Invoke Stop}"/>
 
+            <Label Content="Speaker"/>
             <!--<ComboBox x:Name="speakerComboBox"
                       Width="120"
                       Margin="0,0,20,0"
@@ -38,12 +42,11 @@
                       DisplayMemberPath="DisplayValue"
                       SelectedItem="{Binding SelectedSpeaker}"/>-->
             <ComboBox Width="120"
-                      Margin="0,0,20,0"
+                      Margin="0,0,10,0"
                       ItemsSource="{Binding Source={StaticResource LanguageDataSource}}"
                       SelectedItem="{Binding Speaker.Value}"/>
 
             <Label Content="Translation"/>
-
             <!--<ComboBox x:Name="translateComboBox"
                       Width="120"
                       Margin="0,0,20,0"
@@ -52,7 +55,7 @@
                       DisplayMemberPath="DisplayValue"
                       SelectedItem="{Binding SelectedTranslation}"/>-->
             <ComboBox Width="120"
-                      Margin="0,0,20,0"
+                      Margin="0,0,10,0"
                       ItemsSource="{Binding Source={StaticResource LanguageDataSource}}"
                       SelectedItem="{Binding Translation.Value}"/>
         </StackPanel>
