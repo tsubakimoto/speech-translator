@@ -1,0 +1,79 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Tasks to upgrade projects to .NET 10. Generated from assessment summary and user request 'upgrade-net10'.",
+  "tasks": [
+    {
+      "type": "upgrade",
+      "id": "001-upgrade-speechtranslatorconsole-to-net10",
+      "description": "Update SpeechTranslatorConsole project to target net10.0, update packages and resolve build issues.",
+      "requirements": "Change TargetFramework to net10.0, update NuGet packages as needed, compile and run verification.",
+      "environmentConfiguration": null,
+      "status": "success",
+      "skills": [
+        {
+          "name": "migration-dependency-management",
+          "location": "builtin"
+        }
+      ],
+      "successCriteria": {
+        "passBuild": "true",
+        "generateNewUnitTests": "false",
+        "generateNewIntegrationTests": "false",
+        "passUnitTests": "true",
+        "passIntegrationTests": "false",
+        "securityComplianceCheck": "false"
+      }
+    },
+    {
+      "type": "upgrade",
+      "id": "002-upgrade-speechtranslatorshared-to-net10",
+      "description": "Update SpeechTranslatorShared project to target net10.0, update packages and resolve build issues.",
+      "requirements": "Change TargetFramework to net10.0, update NuGet packages as needed, validate public APIs and run unit tests.",
+      "environmentConfiguration": null,
+      "status": "success",
+      "skills": [
+        {
+          "name": "migration-dependency-management",
+          "location": "builtin"
+        }
+      ],
+      "successCriteria": {
+        "passBuild": "true",
+        "generateNewUnitTests": "false",
+        "generateNewIntegrationTests": "false",
+        "passUnitTests": "true",
+        "passIntegrationTests": "false",
+        "securityComplianceCheck": "false"
+      }
+    },
+    {
+      "type": "upgrade",
+      "id": "003-upgrade-speechtranslatorshared-tests-to-net10",
+      "description": "Update SpeechTranslatorShared.Tests project to target net10.0 and ensure test SDK compatibility.",
+      "requirements": "Change TargetFramework to net10.0 (or use net10.0 for test SDK), update test SDK and packages, run tests.",
+      "environmentConfiguration": null,
+      "status": null,
+      "skills": [
+        {
+          "name": "migration-dependency-management",
+          "location": "builtin"
+        }
+      ],
+      "successCriteria": {
+        "passBuild": "true",
+        "generateNewUnitTests": "false",
+        "generateNewIntegrationTests": "false",
+        "passUnitTests": "true",
+        "passIntegrationTests": "false",
+        "securityComplianceCheck": "false"
+      }
+    }
+  ],
+  "metadata": {
+    "planName": "upgrade-net10",
+    "projectName": "speech-translator",
+    "language": "dotnet",
+    "createdAt": "2026-04-14T14:18:01.609Z",
+    "version": "1.0"
+  }
+}
