@@ -52,7 +52,7 @@
       "description": "Update SpeechTranslatorShared.Tests project to target net10.0 and ensure test SDK compatibility.",
       "requirements": "Change TargetFramework to net10.0 (or use net10.0 for test SDK), update test SDK and packages, run tests.",
       "environmentConfiguration": null,
-      "status": null,
+      "status": "success",
       "skills": [
         {
           "name": "migration-dependency-management",
