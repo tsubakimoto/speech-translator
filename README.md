@@ -1,9 +1,9 @@
-# Speech Translator
+﻿# Speech Translator
 This app is speech translator and recorder using [Azure AI Speech](https://azure.microsoft.com/en-us/products/ai-services/ai-speech).
 
 ## Prerequisites
 
-- [.NET 8.0 SDK](https://dot.net/download)
+- [.NET 10.0 SDK](https://dot.net/download)
 
 ## How to use
 
