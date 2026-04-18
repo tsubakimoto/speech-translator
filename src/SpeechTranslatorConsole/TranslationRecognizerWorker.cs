@@ -21,28 +21,7 @@ internal class TranslationRecognizerWorker : TranslationRecognizerWorkerBase
         var result = e.Result;
         if (result.Reason == ResultReason.TranslatedSpeech)
         {
-            if (_toRecord)
-            {
-                Console.WriteLine($"{result.Text}");
-                foreach (var element in result.Translations)
-                {
-                    Console.WriteLine($"{element.Value}");
-                }
-            }
-            else
-            {
-                using (var sw = new StreamWriter(_filePath, true, Encoding.UTF8))
-                {
-                    Console.WriteLine($"{result.Text}");
-                    sw.WriteLine($"{result.Text}");
-                    foreach (var element in result.Translations)
-                    {
-                        Console.WriteLine($"{element.Value}");
-                        sw.WriteLine($"{element.Value}");
-                    }
-                    sw.WriteLine();
-                }
-            }
+            WriteTranslatedSpeech(result.Text, result.Translations);
         }
         else if (result.Reason == ResultReason.RecognizedSpeech)
         {
@@ -55,6 +34,32 @@ internal class TranslationRecognizerWorker : TranslationRecognizerWorkerBase
         }
 
         Console.WriteLine();
+    }
+
+    internal void WriteTranslatedSpeech(string text, IReadOnlyDictionary<string, string> translations)
+    {
+        if (_toRecord)
+        {
+            using (var sw = new StreamWriter(_filePath, true, Encoding.UTF8))
+            {
+                Console.WriteLine($"{text}");
+                sw.WriteLine($"{text}");
+                foreach (var element in translations)
+                {
+                    Console.WriteLine($"{element.Value}");
+                    sw.WriteLine($"{element.Value}");
+                }
+                sw.WriteLine();
+            }
+        }
+        else
+        {
+            Console.WriteLine($"{text}");
+            foreach (var element in translations)
+            {
+                Console.WriteLine($"{element.Value}");
+            }
+        }
     }
 
     public override void OnCanceled(TranslationRecognitionCanceledEventArgs e)

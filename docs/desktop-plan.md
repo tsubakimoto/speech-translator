@@ -44,14 +44,14 @@
    - Start / Stop ボタン
    - 翻訳結果表示領域（ListView または ObservableCollection バインド）
    - ログ／状態表示（ステータスバー）
-   - 設定画面（Azure Region / SubscriptionKey、マイクデバイス選択）
+   - 設定画面（Azure Region / SubscriptionKey、マイクデバイス選択、録音先フォルダ選択）
 
 4. 設定とシークレット管理
-   - サブスクリプションキーは平文保存を避け、起動時に入力させるか Windows Credential Manager 等の利用を検討
-   - ユーザー設定はユーザーローカル（%LOCALAPPDATA%）へ保存
+    - サブスクリプションキーは平文保存せず、起動中のみメモリ保持
+    - Region / 言語 / 録音名などの非機密設定はユーザーローカル（%LOCALAPPDATA%）へ保存
 
 5. ファイル保存
-   - recordings フォルダは既定でユーザーのドキュメント内に作成
+   - recordings フォルダは既定でユーザーのドキュメント内に作成（必要に応じて変更可能）
    - 既存のテキスト出力ロジックを再利用（スレッド同期に注意）
 
 6. UI と非同期処理の同期
@@ -81,9 +81,9 @@
 - Speech SDK のネイティブ依存やバージョン要件（ランタイムの追加が必要な場合あり）。
 - マイクデバイス選択/権限は OS に依存。UWP/WinUI と WPF で挙動が異なる点に留意。
 
-## 次のアクション（ユーザーへの質問）
-1. ターゲット UI フレームワークは WPF でよいですか？（代替: WinUI / MAUI / Avalonia）
-2. サブスクリプションキーの保存方法（ユーザーに毎回入力 / Windows Credential Manager / 環境変数）の希望はありますか？
+## 現在の実装方針
+- UI フレームワークは WPF (.NET 10)
+- SubscriptionKey は保存せず、起動中のみ保持
 
 ## Microsoft Learn 参考
 - https://learn.microsoft.com/en-us/dotnet/core/porting/

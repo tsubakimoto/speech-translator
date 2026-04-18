@@ -56,12 +56,12 @@ public class TranslatorTest
     }
 
     [Fact]
-    public void MultiLingualTranslation_NullWorker()
+    public async Task MultiLingualTranslation_NullWorker()
     {
         var translator = CreateTranslator();
         var action = () => translator.MultiLingualTranslation(null);
 
-        action.Should().ThrowAsync<ArgumentNullException>();
+        await action.Should().ThrowAsync<ArgumentNullException>();
     }
 
     private static Translator CreateTranslator()

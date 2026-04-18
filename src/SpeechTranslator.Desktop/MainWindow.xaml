@@ -1,0 +1,102 @@
+<Window x:Class="SpeechTranslator.Desktop.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Speech Translator"
+        Height="780"
+        Width="1180">
+    <Grid Margin="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <GroupBox Header="Speech settings" Padding="12">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <TextBlock Grid.Row="0" Grid.Column="0" Margin="0,0,8,8" VerticalAlignment="Center" Text="Azure Region" />
+                <TextBox Grid.Row="0" Grid.Column="1" Margin="0,0,16,8" Text="{Binding Region, UpdateSourceTrigger=PropertyChanged}" />
+
+                <TextBlock Grid.Row="0" Grid.Column="2" Margin="0,0,8,8" VerticalAlignment="Center" Text="Subscription Key" />
+                <PasswordBox x:Name="SubscriptionKeyBox" Grid.Row="0" Grid.Column="3" Margin="0,0,0,8" PasswordChanged="SubscriptionKeyBox_OnPasswordChanged" />
+
+                <TextBlock Grid.Row="1" Grid.Column="0" Margin="0,0,8,8" VerticalAlignment="Center" Text="Source language" />
+                <ComboBox Grid.Row="1" Grid.Column="1" Margin="0,0,16,8"
+                          ItemsSource="{Binding Languages}"
+                          SelectedItem="{Binding SelectedSourceLanguage}"
+                          DisplayMemberPath="DisplayName" />
+
+                <TextBlock Grid.Row="1" Grid.Column="2" Margin="0,0,8,8" VerticalAlignment="Center" Text="Target language" />
+                <ComboBox Grid.Row="1" Grid.Column="3" Margin="0,0,0,8"
+                          ItemsSource="{Binding Languages}"
+                          SelectedItem="{Binding SelectedTargetLanguage}"
+                          DisplayMemberPath="DisplayName" />
+
+                <TextBlock Grid.Row="2" Grid.Column="0" Margin="0,0,8,8" VerticalAlignment="Center" Text="Microphone device" />
+                <ComboBox Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="3" Margin="0,0,0,8"
+                          ItemsSource="{Binding MicrophoneDevices}"
+                          SelectedItem="{Binding SelectedMicrophoneDevice}"
+                          DisplayMemberPath="DisplayName" />
+
+                <TextBlock Grid.Row="3" Grid.Column="0" Margin="0,0,8,8" VerticalAlignment="Center" Text="Recording folder" />
+                <TextBox Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="2" Margin="0,0,8,8" Text="{Binding RecordingDirectory, UpdateSourceTrigger=PropertyChanged}" />
+                <Button Grid.Row="3" Grid.Column="3" Margin="0,0,0,8" Width="100" Command="{Binding SelectRecordingDirectoryCommand}" Content="Browse..." />
+
+                <TextBlock Grid.Row="4" Grid.Column="0" Margin="0,0,8,0" VerticalAlignment="Center" Text="Recording name" />
+                <TextBox Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="2" Margin="0,0,8,0" Text="{Binding RecordingName, UpdateSourceTrigger=PropertyChanged}" />
+
+                <StackPanel Grid.Row="4" Grid.Column="3" Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button Width="100" Margin="0,0,8,0" Command="{Binding StartCommand}" Content="Start" />
+                    <Button Width="100" Command="{Binding StopCommand}" Content="Stop" />
+                </StackPanel>
+            </Grid>
+        </GroupBox>
+
+        <Grid Grid.Row="1" Margin="0,12,0,12">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <GroupBox Header="Live source text" Margin="0,0,6,0" Padding="12">
+                <TextBox Text="{Binding CurrentSourceText}" IsReadOnly="True" TextWrapping="Wrap" AcceptsReturn="True" VerticalScrollBarVisibility="Auto" />
+            </GroupBox>
+
+            <GroupBox Grid.Column="1" Header="Live translated text" Margin="6,0,0,0" Padding="12">
+                <TextBox Text="{Binding CurrentTranslatedText}" IsReadOnly="True" TextWrapping="Wrap" AcceptsReturn="True" VerticalScrollBarVisibility="Auto" />
+            </GroupBox>
+        </Grid>
+
+        <GroupBox Grid.Row="2" Header="Translations" Padding="12">
+            <ListView ItemsSource="{Binding Translations}">
+                <ListView.View>
+                    <GridView>
+                        <GridViewColumn Width="140" Header="Timestamp" DisplayMemberBinding="{Binding Timestamp}" />
+                        <GridViewColumn Width="420" Header="Source" DisplayMemberBinding="{Binding SourceText}" />
+                        <GridViewColumn Width="420" Header="Translation" DisplayMemberBinding="{Binding TranslatedText}" />
+                    </GridView>
+                </ListView.View>
+            </ListView>
+        </GroupBox>
+
+        <StatusBar Grid.Row="3" Margin="0,12,0,0">
+            <StatusBarItem>
+                <TextBlock Text="{Binding StatusMessage}" />
+            </StatusBarItem>
+        </StatusBar>
+    </Grid>
+</Window>

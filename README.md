@@ -24,6 +24,13 @@ This app is speech translator and recorder using [Azure AI Speech](https://azure
 7. Run `SpeechTranslatorConsole` project. (`dotnet run --project src/SpeechTranslatorConsole`)
 8. Type file name in console.
 
+## Desktop app
+
+- `SpeechTranslator.Desktop` provides the WPF UI for real-time translation.
+- Run it with `dotnet run --project src/SpeechTranslator.Desktop`.
+- The app keeps the Subscription Key in memory only; Region, the selected microphone, recording folder, and the last selected languages are saved locally.
+- Recordings are written to the selected folder as `<name>.txt` (default: `Documents\recordings`).
+
 ## References
 
 - https://learn.microsoft.com/en-us/azure/ai-services/speech-service/language-identification

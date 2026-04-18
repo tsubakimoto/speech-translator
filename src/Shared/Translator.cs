@@ -3,8 +3,9 @@
 public class Translator
 {
     private readonly SpeechTranslationConfig _speechTranslationConfig;
+    private readonly string? _microphoneDeviceName;
 
-    public Translator(Uri endpointUrl, string subscriptionKey, string recognitionLanguage = "en-US", string targetLanguage = "ja-JP")
+    public Translator(Uri endpointUrl, string subscriptionKey, string recognitionLanguage = "en-US", string targetLanguage = "ja-JP", string? microphoneDeviceName = null)
     {
         if (endpointUrl is null)
         {
@@ -30,9 +31,10 @@ public class Translator
         _speechTranslationConfig.SpeechRecognitionLanguage = recognitionLanguage;
         _speechTranslationConfig.AddTargetLanguage(targetLanguage);
         _speechTranslationConfig.SetProperty(PropertyId.SpeechServiceConnection_TranslationVoice, "en-US-JennyNeural");
+        _microphoneDeviceName = string.IsNullOrWhiteSpace(microphoneDeviceName) ? null : microphoneDeviceName;
     }
 
-    public async Task MultiLingualTranslation(TranslationRecognizerWorkerBase worker)
+    public async Task MultiLingualTranslation(TranslationRecognizerWorkerBase worker, CancellationToken cancellationToken = default)
     {
         if (worker is null)
         {
@@ -40,11 +42,15 @@ public class Translator
         }
 
         var autoDetectSourceLanguageConfig = AutoDetectSourceLanguageConfig.FromLanguages([_speechTranslationConfig.SpeechRecognitionLanguage]);
-        var stopTranslation = new TaskCompletionSource<int>();
+        var stopTranslation = new TaskCompletionSource<int>(TaskCreationOptions.RunContinuationsAsynchronously);
 
-        using (var audioInput = AudioConfig.FromDefaultMicrophoneInput())
+        using (var audioInput = _microphoneDeviceName is null
+            ? AudioConfig.FromDefaultMicrophoneInput()
+            : AudioConfig.FromMicrophoneInput(_microphoneDeviceName))
         using (var recognizer = new TranslationRecognizer(_speechTranslationConfig, autoDetectSourceLanguageConfig, audioInput))
         {
+            using var cancellationRegistration = cancellationToken.Register(() => stopTranslation.TrySetCanceled(cancellationToken));
+
             recognizer.Recognizing += (s, e) => worker.OnRecognizing(e);
 
             recognizer.Recognized += (s, e) => worker.OnRecognized(e);
@@ -70,8 +76,17 @@ public class Translator
             // Starts continuous recognition. Uses StopContinuousRecognitionAsync() to stop recognition.
             await recognizer.StartContinuousRecognitionAsync().ConfigureAwait(false);
 
-            Task.WaitAny(new[] { stopTranslation.Task });
-            await recognizer.StopContinuousRecognitionAsync().ConfigureAwait(false);
+            try
+            {
+                await stopTranslation.Task.ConfigureAwait(false);
+            }
+            catch (OperationCanceledException)
+            {
+            }
+            finally
+            {
+                await recognizer.StopContinuousRecognitionAsync().ConfigureAwait(false);
+            }
         }
     }
 }
