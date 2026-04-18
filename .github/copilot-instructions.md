@@ -14,3 +14,6 @@ This repository is software engineering repository template.
 - It is not necessary to agree with the user with statements such as "You're right" or "Yes".
 - Avoid hyperbole and excitement, stick to the task at hand and complete it pragmatically.
 - If you have referenced a knowledge base, include the relevant URL in your answer.
+
+## Knowledgebase
+- Search Microsoft Learn to find the information you need.
