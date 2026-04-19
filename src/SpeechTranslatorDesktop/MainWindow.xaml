@@ -1,6 +1,7 @@
-<Window x:Class="SpeechTranslatorDesktop.MainWindow"
+﻿<Window x:Class="SpeechTranslatorDesktop.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="clr-namespace:SpeechTranslatorDesktop.Behaviors"
         Title="Speech Translator Desktop"
         Height="640"
         Width="960"
@@ -69,7 +70,8 @@
             <DataGrid ItemsSource="{Binding TranslationLogs}"
                       AutoGenerateColumns="False"
                       IsReadOnly="True"
-                      HeadersVisibility="Column">
+                      HeadersVisibility="Column"
+                      local:AutoScrollDataGridBehavior.AutoScroll="True">
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="原文"
                                         Binding="{Binding SourceText}"
@@ -84,7 +86,8 @@
         <GroupBox Grid.Row="4"
                   Grid.ColumnSpan="2"
                   Header="状態ログ">
-            <ListBox ItemsSource="{Binding ActivityLogs}" />
+            <ListBox ItemsSource="{Binding ActivityLogs}"
+                     local:AutoScrollListBoxBehavior.AutoScroll="True" />
         </GroupBox>
     </Grid>
 </Window>

@@ -1,7 +1,11 @@
-global using System.Collections.ObjectModel;
+﻿global using System.Collections.ObjectModel;
+global using System.Collections.Specialized;
 global using System.ComponentModel;
 global using System.IO;
 global using System.Runtime.CompilerServices;
 global using System.Windows;
+global using System.Windows.Controls;
+global using System.Windows.Controls.Primitives;
+global using System.ComponentModel.Design;
 global using Microsoft.CognitiveServices.Speech;
 global using Microsoft.CognitiveServices.Speech.Translation;
