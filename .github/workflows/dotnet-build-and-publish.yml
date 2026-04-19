@@ -9,16 +9,74 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 #v6
+
     - name: Setup .NET
-      uses: actions/setup-dotnet@v5
+      uses: actions/setup-dotnet@c2fa09f4bde5ebb9d1777cf28262a3eb3db3ced7 #v5
       with:
         dotnet-version: '10.0.x'
+
+    - name: Get version
+      id: version
+      shell: pwsh
+      run: |
+        $props = [xml](Get-Content 'Directory.Build.props')
+        $version = $props.Project.PropertyGroup.VersionPrefix
+        if ([string]::IsNullOrWhiteSpace($version)) {
+          throw 'VersionPrefix is not defined in Directory.Build.props.'
+        }
+        "version=$version" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
+
     - name: Restore dependencies
-      run: dotnet restore
-    - name: Build
-      run: dotnet build --no-restore
-    - name: Test
-      run: dotnet test --no-build --verbosity normal
+      run: dotnet restore speech-translator.sln
+
+    - name: Build solution
+      run: dotnet build speech-translator.sln --configuration Release --no-restore
+
+    - name: Test solution
+      run: dotnet test speech-translator.sln --configuration Release --no-build --verbosity normal
+
+    - name: Publish Console
+      run: dotnet publish src/SpeechTranslatorConsole/SpeechTranslatorConsole.csproj --configuration Release --no-build --output artifacts/publish/console
+
+    - name: Publish Desktop
+      run: dotnet publish src/SpeechTranslatorDesktop/SpeechTranslatorDesktop.csproj --configuration Release --no-build --output artifacts/publish/desktop
+
+    - name: Package publish outputs
+      shell: pwsh
+      run: |
+        New-Item -ItemType Directory -Path artifacts/release -Force | Out-Null
+        Compress-Archive -Path artifacts/publish/console/* -DestinationPath "artifacts/release/speech-translator-console-${{ steps.version.outputs.version }}.zip" -Force
+        Compress-Archive -Path artifacts/publish/desktop/* -DestinationPath "artifacts/release/speech-translator-desktop-${{ steps.version.outputs.version }}.zip" -Force
+
+    - name: Upload publish artifacts
+      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a #v7
+      with:
+        name: publish-${{ steps.version.outputs.version }}
+        path: artifacts/release/*.zip
+
+  release:
+    needs: build
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+    - name: Download publish artifacts
+      uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c #v8
+      with:
+        name: publish-${{ needs.build.outputs.version }}
+        path: artifacts/release
+
+    - name: Create tag and release
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        gh release create "${{ needs.build.outputs.version }}" artifacts/release/*.zip `
+          --title "${{ needs.build.outputs.version }}" `
+          --generate-notes `
+          --target "${{ github.sha }}"
