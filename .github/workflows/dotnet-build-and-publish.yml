@@ -75,7 +75,7 @@ jobs:
     - name: Create tag and release
       uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65 #v2.6.2
       with:
-        tag_name: ${{ github.sha }}
+        tag_name: ${{ needs.build.outputs.version }}
         name: ${{ needs.build.outputs.version }}
         generate_release_notes: true
         target_commitish: ${{ github.sha }}
