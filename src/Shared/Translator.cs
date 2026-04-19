@@ -32,7 +32,7 @@ public class Translator
         _speechTranslationConfig.SetProperty(PropertyId.SpeechServiceConnection_TranslationVoice, "en-US-JennyNeural");
     }
 
-    public async Task MultiLingualTranslation(TranslationRecognizerWorkerBase worker)
+    public async Task<ITranslationSession> StartTranslationAsync(TranslationRecognizerWorkerBase worker)
     {
         if (worker is null)
         {
@@ -40,38 +40,17 @@ public class Translator
         }
 
         var autoDetectSourceLanguageConfig = AutoDetectSourceLanguageConfig.FromLanguages([_speechTranslationConfig.SpeechRecognitionLanguage]);
-        var stopTranslation = new TaskCompletionSource<int>();
+        var audioInput = AudioConfig.FromDefaultMicrophoneInput();
+        var recognizer = new TranslationRecognizer(_speechTranslationConfig, autoDetectSourceLanguageConfig, audioInput);
+        var session = new TranslationSession(audioInput, recognizer, worker);
 
-        using (var audioInput = AudioConfig.FromDefaultMicrophoneInput())
-        using (var recognizer = new TranslationRecognizer(_speechTranslationConfig, autoDetectSourceLanguageConfig, audioInput))
-        {
-            recognizer.Recognizing += (s, e) => worker.OnRecognizing(e);
+        await session.StartAsync().ConfigureAwait(false);
+        return session;
+    }
 
-            recognizer.Recognized += (s, e) => worker.OnRecognized(e);
-
-            recognizer.Canceled += (s, e) =>
-            {
-                stopTranslation.TrySetResult(0);
-                worker.OnCanceled(e);
-            };
-
-            recognizer.SpeechStartDetected += (s, e) => worker.OnSpeechStartDetected(e);
-
-            recognizer.SpeechEndDetected += (s, e) => worker.OnSpeechEndDetected(e);
-
-            recognizer.SessionStarted += (s, e) => worker.OnSessionStarted(e);
-
-            recognizer.SessionStopped += (s, e) =>
-            {
-                stopTranslation.TrySetResult(0);
-                worker.OnSessionStopped(e);
-            };
-
-            // Starts continuous recognition. Uses StopContinuousRecognitionAsync() to stop recognition.
-            await recognizer.StartContinuousRecognitionAsync().ConfigureAwait(false);
-
-            Task.WaitAny(new[] { stopTranslation.Task });
-            await recognizer.StopContinuousRecognitionAsync().ConfigureAwait(false);
-        }
+    public async Task MultiLingualTranslation(TranslationRecognizerWorkerBase worker)
+    {
+        await using var session = await StartTranslationAsync(worker).ConfigureAwait(false);
+        await session.Completion.ConfigureAwait(false);
     }
 }
