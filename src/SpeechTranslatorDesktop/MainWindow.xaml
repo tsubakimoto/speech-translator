@@ -80,10 +80,11 @@
                            VerticalAlignment="Center"
                            FontWeight="Bold"
                            Text="API Key" />
-                <PasswordBox Grid.Row="1"
-                             Grid.Column="1"
-                             Margin="0,0,12,8"
-                             local:PasswordBoxBindingBehavior.BoundPassword="{Binding AzureApiKey, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                 <PasswordBox Grid.Row="1"
+                              Grid.Column="1"
+                              Margin="0,0,12,8"
+                              local:PasswordBoxBindingBehavior.Attach="True"
+                              local:PasswordBoxBindingBehavior.BoundPassword="{Binding AzureApiKey, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
 
                 <Button Grid.Row="0"
                         Grid.RowSpan="2"
