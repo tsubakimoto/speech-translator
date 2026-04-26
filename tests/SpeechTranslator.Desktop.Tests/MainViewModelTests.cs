@@ -34,6 +34,94 @@ public class MainViewModelTests
     }
 
     [Fact]
+    public async Task InitializeAsync_WhenSavedSettingsExist_LoadsThemIntoViewModel()
+    {
+        var viewModel = CreateViewModel(
+            settingsStore: new FakeAzureAiServiceSettingsStore
+            {
+                LoadedSettings = new AzureAiServiceSettings("japaneast", "saved-key")
+            });
+
+        await viewModel.InitializeAsync();
+
+        viewModel.AzureRegion.Should().Be("japaneast");
+        viewModel.AzureApiKey.Should().Be("saved-key");
+        viewModel.SettingsStatusMessage.Should().Contain("読み込み");
+    }
+
+    [Fact]
+    public async Task InitializeAsync_WhenSavedSettingsDoNotExist_ShowsGuidance()
+    {
+        var viewModel = CreateViewModel();
+
+        await viewModel.InitializeAsync();
+
+        viewModel.AzureRegion.Should().BeEmpty();
+        viewModel.AzureApiKey.Should().BeEmpty();
+        viewModel.SettingsStatusMessage.Should().Contain("保存");
+        viewModel.SettingsStatusMessage.Should().Contain("SPEECH_REGION");
+    }
+
+    [Fact]
+    public async Task InitializeAsync_OnFirstLaunchWithMissingSettingsDatabase_ShowsGuidanceInsteadOfFailure()
+    {
+        var testDirectory = Path.Combine(
+            AppContext.BaseDirectory,
+            "test-artifacts",
+            nameof(MainViewModelTests),
+            Guid.NewGuid().ToString("N"));
+
+        try
+        {
+            var databasePath = Path.Combine(testDirectory, "nested", "speech-translator-desktop.db");
+            var viewModel = CreateViewModel(
+                settingsStore: new SqliteAzureAiServiceSettingsStore(databasePath, new FakeSecretProtector()));
+
+            await viewModel.InitializeAsync();
+
+            viewModel.SettingsStatusMessage.Should().Contain("保存");
+            viewModel.SettingsStatusMessage.Should().Contain("SPEECH_REGION");
+            viewModel.SettingsStatusMessage.Should().NotContain("失敗");
+        }
+        finally
+        {
+            if (Directory.Exists(testDirectory))
+            {
+                Directory.Delete(testDirectory, recursive: true);
+            }
+        }
+    }
+
+    [Fact]
+    public async Task SaveSettings_WhenValuesAreValid_PersistsThem()
+    {
+        var settingsStore = new FakeAzureAiServiceSettingsStore();
+        var viewModel = CreateViewModel(settingsStore: settingsStore);
+        viewModel.AzureRegion = "japaneast";
+        viewModel.AzureApiKey = "saved-key";
+
+        await ExecuteAsync(viewModel.SaveSettingsCommand);
+
+        settingsStore.SaveCallCount.Should().Be(1);
+        settingsStore.SavedSettings.Should().BeEquivalentTo(new AzureAiServiceSettings("japaneast", "saved-key"));
+        viewModel.SettingsStatusMessage.Should().Contain("保存");
+    }
+
+    [Fact]
+    public async Task SaveSettings_WhenValuesAreMissing_ShowsValidationError()
+    {
+        var settingsStore = new FakeAzureAiServiceSettingsStore();
+        var viewModel = CreateViewModel(settingsStore: settingsStore);
+        viewModel.AzureRegion = "japaneast";
+        viewModel.AzureApiKey = "";
+
+        await ExecuteAsync(viewModel.SaveSettingsCommand);
+
+        settingsStore.SaveCallCount.Should().Be(0);
+        viewModel.SettingsStatusMessage.Should().Contain("API キー");
+    }
+
+    [Fact]
     public async Task Start_WhenCredentialsPresent_StartsTranslation()
     {
         var translationController = new FakeTranslationController();
@@ -46,6 +134,21 @@ public class MainViewModelTests
         viewModel.IsRunning.Should().BeTrue();
         viewModel.StartCommand.CanExecute(null).Should().BeFalse();
         viewModel.StopCommand.CanExecute(null).Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task Start_WhenConfiguredCredentialsPresent_PassesThemToController()
+    {
+        var translationController = new FakeTranslationController();
+        var viewModel = CreateViewModel(
+            credentialsProvider: new FakeSpeechCredentialsProvider(SpeechCredentialsResult.Success(new SpeechCredentials("ui-region", "ui-key"))),
+            translationController: translationController);
+        viewModel.AzureRegion = "ui-region";
+        viewModel.AzureApiKey = "ui-key";
+
+        await ExecuteAsync(viewModel.StartCommand);
+
+        translationController.LastStartCredentials.Should().BeEquivalentTo(new SpeechCredentials("ui-region", "ui-key"));
     }
 
     [Fact]
@@ -184,6 +287,7 @@ public class MainViewModelTests
     private static MainViewModel CreateViewModel(
         IUiDispatcher? dispatcher = null,
         ISpeechCredentialsProvider? credentialsProvider = null,
+        IAzureAiServiceSettingsStore? settingsStore = null,
         IRecordingFileService? recordingFileService = null,
         ITranslationController? translationController = null,
         IDesktopTranslationWorkerFactory? workerFactory = null)
@@ -191,6 +295,7 @@ public class MainViewModelTests
         return new MainViewModel(
             dispatcher ?? new ImmediateDispatcher(),
             credentialsProvider ?? new FakeSpeechCredentialsProvider(SpeechCredentialsResult.Success(new SpeechCredentials("japaneast", "test-key"))),
+            settingsStore ?? new FakeAzureAiServiceSettingsStore(),
             recordingFileService ?? new FakeRecordingFileService(),
             translationController ?? new FakeTranslationController(),
             workerFactory ?? new FakeDesktopTranslationWorkerFactory(new FakeDesktopTranslationWorker()));
@@ -215,7 +320,33 @@ public class MainViewModelTests
             _result = result;
         }
 
-        public SpeechCredentialsResult GetCredentials() => _result;
+        public SpeechCredentialsResult GetCredentials(string? preferredRegion = null, string? preferredKey = null) => _result;
+    }
+
+    private sealed class FakeAzureAiServiceSettingsStore : IAzureAiServiceSettingsStore
+    {
+        public AzureAiServiceSettings? LoadedSettings { get; init; }
+        public AzureAiServiceSettings? SavedSettings { get; private set; }
+        public int SaveCallCount { get; private set; }
+
+        public Task<AzureAiServiceSettings?> LoadAsync(CancellationToken cancellationToken = default)
+        {
+            return Task.FromResult(LoadedSettings);
+        }
+
+        public Task SaveAsync(AzureAiServiceSettings settings, CancellationToken cancellationToken = default)
+        {
+            SaveCallCount++;
+            SavedSettings = settings;
+            return Task.CompletedTask;
+        }
+    }
+
+    private sealed class FakeSecretProtector : ISecretProtector
+    {
+        public byte[] Protect(string plaintext) => Encoding.UTF8.GetBytes(plaintext);
+
+        public string Unprotect(byte[] protectedData) => Encoding.UTF8.GetString(protectedData);
     }
 
     private sealed class FakeTranslationController : ITranslationController
@@ -226,6 +357,7 @@ public class MainViewModelTests
         public bool StartShouldYield { get; init; }
         public Exception? StopException { get; init; }
         public bool KeepRunningOnStopFailure { get; init; }
+        public SpeechCredentials? LastStartCredentials { get; private set; }
 
         public Task StartAsync(SpeechCredentials credentials, string sourceLanguage, string targetLanguage, TranslationRecognizerWorkerBase worker, CancellationToken cancellationToken = default)
         {
@@ -239,6 +371,7 @@ public class MainViewModelTests
                 }
 
                 StartCallCount++;
+                LastStartCredentials = credentials;
                 IsRunning = true;
             }
         }

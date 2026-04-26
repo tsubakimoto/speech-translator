@@ -12,6 +12,7 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
@@ -46,10 +47,63 @@
                      Text="{Binding RecordingFileName, UpdateSourceTrigger=PropertyChanged}" />
         </StackPanel>
 
-        <StackPanel Grid.Row="2"
-                    Grid.ColumnSpan="2"
-                    Orientation="Horizontal"
-                    Margin="0,0,0,12">
+        <GroupBox Grid.Row="2"
+                  Grid.ColumnSpan="2"
+                  Header="Azure AI Service 設定"
+                  Margin="0,0,0,12">
+            <Grid Margin="12">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Row="0"
+                           Grid.Column="0"
+                           Margin="0,0,12,8"
+                           VerticalAlignment="Center"
+                           FontWeight="Bold"
+                           Text="Region" />
+                <TextBox Grid.Row="0"
+                         Grid.Column="1"
+                         Margin="0,0,12,8"
+                         Text="{Binding AzureRegion, UpdateSourceTrigger=PropertyChanged}" />
+
+                <TextBlock Grid.Row="1"
+                           Grid.Column="0"
+                           Margin="0,0,12,8"
+                           VerticalAlignment="Center"
+                           FontWeight="Bold"
+                           Text="API Key" />
+                 <PasswordBox Grid.Row="1"
+                              Grid.Column="1"
+                              Margin="0,0,12,8"
+                              local:PasswordBoxBindingBehavior.Attach="True"
+                              local:PasswordBoxBindingBehavior.BoundPassword="{Binding AzureApiKey, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+
+                <Button Grid.Row="0"
+                        Grid.RowSpan="2"
+                        Grid.Column="2"
+                        Width="120"
+                        Command="{Binding SaveSettingsCommand}"
+                        Content="保存" />
+
+                <TextBlock Grid.Row="2"
+                           Grid.ColumnSpan="3"
+                           Text="{Binding SettingsStatusMessage}"
+                           TextWrapping="Wrap" />
+            </Grid>
+        </GroupBox>
+
+        <StackPanel Grid.Row="3"
+                     Grid.ColumnSpan="2"
+                     Orientation="Horizontal"
+                     Margin="0,0,0,12">
             <Button Width="120"
                     Command="{Binding StartCommand}"
                     Content="開始" />
@@ -63,7 +117,7 @@
                        Text="{Binding StatusMessage}" />
         </StackPanel>
 
-        <GroupBox Grid.Row="3"
+        <GroupBox Grid.Row="4"
                   Grid.ColumnSpan="2"
                   Header="翻訳ログ"
                   Margin="0,0,0,12">
@@ -83,7 +137,7 @@
             </DataGrid>
         </GroupBox>
 
-        <GroupBox Grid.Row="4"
+        <GroupBox Grid.Row="5"
                   Grid.ColumnSpan="2"
                   Header="状態ログ">
             <ListBox ItemsSource="{Binding ActivityLogs}"

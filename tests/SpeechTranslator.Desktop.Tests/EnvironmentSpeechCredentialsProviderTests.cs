@@ -22,6 +22,42 @@ public class EnvironmentSpeechCredentialsProviderTests
         result.Credentials.Key.Should().Be("test-key");
     }
 
+    [Fact]
+    public void GetCredentials_PrefersConfiguredValuesOverEnvironmentVariables()
+    {
+        var provider = new EnvironmentSpeechCredentialsProvider(name => name switch
+        {
+            "SPEECH_REGION" => "env-region",
+            "SPEECH_KEY" => "env-key",
+            _ => null
+        });
+
+        var result = provider.GetCredentials("configured-region", "configured-key");
+
+        result.IsValid.Should().BeTrue();
+        result.Credentials.Should().NotBeNull();
+        result.Credentials!.Region.Should().Be("configured-region");
+        result.Credentials.Key.Should().Be("configured-key");
+    }
+
+    [Fact]
+    public void GetCredentials_WhenConfiguredValuesMissing_FallsBackToEnvironmentVariables()
+    {
+        var provider = new EnvironmentSpeechCredentialsProvider(name => name switch
+        {
+            "SPEECH_REGION" => "env-region",
+            "SPEECH_KEY" => "env-key",
+            _ => null
+        });
+
+        var result = provider.GetCredentials("", null);
+
+        result.IsValid.Should().BeTrue();
+        result.Credentials.Should().NotBeNull();
+        result.Credentials!.Region.Should().Be("env-region");
+        result.Credentials.Key.Should().Be("env-key");
+    }
+
     [Theory]
     [InlineData(null, "test-key", "SPEECH_REGION")]
     [InlineData("japaneast", null, "SPEECH_KEY")]

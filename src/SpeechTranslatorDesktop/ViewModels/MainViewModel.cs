@@ -8,25 +8,31 @@ public sealed class MainViewModel : INotifyPropertyChanged
 {
     private readonly IUiDispatcher _dispatcher;
     private readonly ISpeechCredentialsProvider _credentialsProvider;
+    private readonly IAzureAiServiceSettingsStore _settingsStore;
     private readonly IRecordingFileService _recordingFileService;
     private readonly ITranslationController _translationController;
     private readonly IDesktopTranslationWorkerFactory _workerFactory;
     private IDesktopTranslationWorker? _currentWorker;
     private LanguageOption? _selectedSourceLanguage;
     private LanguageOption? _selectedTargetLanguage;
+    private string _azureApiKey = string.Empty;
+    private string _azureRegion = string.Empty;
     private string _recordingFileName = string.Empty;
+    private string _settingsStatusMessage = string.Empty;
     private string _statusMessage = "停止";
     private bool _isRunning;
 
     public MainViewModel(
         IUiDispatcher dispatcher,
         ISpeechCredentialsProvider credentialsProvider,
+        IAzureAiServiceSettingsStore settingsStore,
         IRecordingFileService recordingFileService,
         ITranslationController translationController,
         IDesktopTranslationWorkerFactory workerFactory)
     {
         _dispatcher = dispatcher ?? throw new ArgumentNullException(nameof(dispatcher));
         _credentialsProvider = credentialsProvider ?? throw new ArgumentNullException(nameof(credentialsProvider));
+        _settingsStore = settingsStore ?? throw new ArgumentNullException(nameof(settingsStore));
         _recordingFileService = recordingFileService ?? throw new ArgumentNullException(nameof(recordingFileService));
         _translationController = translationController ?? throw new ArgumentNullException(nameof(translationController));
         _workerFactory = workerFactory ?? throw new ArgumentNullException(nameof(workerFactory));
@@ -42,6 +48,7 @@ public sealed class MainViewModel : INotifyPropertyChanged
 
         StartCommand = new AsyncRelayCommand(StartAsync, () => !IsRunning, _dispatcher, HandleCommandException);
         StopCommand = new AsyncRelayCommand(StopAsync, () => IsRunning, _dispatcher, HandleCommandException);
+        SaveSettingsCommand = new AsyncRelayCommand(SaveSettingsAsync, dispatcher: _dispatcher, onException: HandleSettingsCommandException);
     }
 
     public event PropertyChangedEventHandler? PropertyChanged;
@@ -49,6 +56,36 @@ public sealed class MainViewModel : INotifyPropertyChanged
     public ObservableCollection<string> ActivityLogs { get; } = [];
 
     public ObservableCollection<LanguageOption> AvailableLanguages { get; }
+
+    public string AzureApiKey
+    {
+        get => _azureApiKey;
+        set
+        {
+            if (_azureApiKey == value)
+            {
+                return;
+            }
+
+            _azureApiKey = value;
+            OnPropertyChanged();
+        }
+    }
+
+    public string AzureRegion
+    {
+        get => _azureRegion;
+        set
+        {
+            if (_azureRegion == value)
+            {
+                return;
+            }
+
+            _azureRegion = value;
+            OnPropertyChanged();
+        }
+    }
 
     public bool IsRunning
     {
@@ -114,6 +151,23 @@ public sealed class MainViewModel : INotifyPropertyChanged
 
     public AsyncRelayCommand StartCommand { get; }
 
+    public AsyncRelayCommand SaveSettingsCommand { get; }
+
+    public string SettingsStatusMessage
+    {
+        get => _settingsStatusMessage;
+        private set
+        {
+            if (_settingsStatusMessage == value)
+            {
+                return;
+            }
+
+            _settingsStatusMessage = value;
+            OnPropertyChanged();
+        }
+    }
+
     public string StatusMessage
     {
         get => _statusMessage;
@@ -132,6 +186,28 @@ public sealed class MainViewModel : INotifyPropertyChanged
     public AsyncRelayCommand StopCommand { get; }
 
     public ObservableCollection<TranslationLogItem> TranslationLogs { get; } = [];
+
+    public async Task InitializeAsync(CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var savedSettings = await _settingsStore.LoadAsync(cancellationToken);
+            if (savedSettings is null)
+            {
+                SettingsStatusMessage = "Azure AI Service のリージョンと API キーを入力して保存してください。未保存の場合は SPEECH_REGION / SPEECH_KEY をフォールバックとして使用します。";
+                return;
+            }
+
+            AzureRegion = savedSettings.Region;
+            AzureApiKey = savedSettings.ApiKey;
+            SettingsStatusMessage = "保存済みの Azure AI Service 設定を読み込みました。";
+        }
+        catch (Exception ex)
+        {
+            SettingsStatusMessage = $"設定の読み込みに失敗しました: {ex.Message}";
+            AddActivityLog(SettingsStatusMessage);
+        }
+    }
 
     private async Task StartAsync()
     {
@@ -154,7 +230,7 @@ public sealed class MainViewModel : INotifyPropertyChanged
             return;
         }
 
-        var credentialsResult = _credentialsProvider.GetCredentials();
+        var credentialsResult = _credentialsProvider.GetCredentials(AzureRegion, AzureApiKey);
         if (!credentialsResult.IsValid || credentialsResult.Credentials is null)
         {
             StatusMessage = credentialsResult.ErrorMessage;
@@ -184,6 +260,25 @@ public sealed class MainViewModel : INotifyPropertyChanged
             StatusMessage = ex.Message;
             AddActivityLog(ex.Message);
         }
+    }
+
+    private async Task SaveSettingsAsync()
+    {
+        var normalizedRegion = AzureRegion.Trim();
+        var normalizedApiKey = AzureApiKey.Trim();
+
+        if (string.IsNullOrWhiteSpace(normalizedRegion) || string.IsNullOrWhiteSpace(normalizedApiKey))
+        {
+            SettingsStatusMessage = "Azure AI Service のリージョンと API キーを入力してから保存してください。";
+            return;
+        }
+
+        await _settingsStore.SaveAsync(new AzureAiServiceSettings(normalizedRegion, normalizedApiKey));
+
+        AzureRegion = normalizedRegion;
+        AzureApiKey = normalizedApiKey;
+        SettingsStatusMessage = "Azure AI Service 設定を保存しました。";
+        AddActivityLog("Azure AI Service 設定を保存しました。");
     }
 
     private async Task StopAsync()
@@ -294,6 +389,15 @@ public sealed class MainViewModel : INotifyPropertyChanged
             {
                 DetachCurrentWorker();
             }
+        });
+    }
+
+    private void HandleSettingsCommandException(Exception ex)
+    {
+        _dispatcher.Invoke(() =>
+        {
+            SettingsStatusMessage = $"設定の保存に失敗しました: {ex.Message}";
+            AddActivityLog(SettingsStatusMessage);
         });
     }
 
