@@ -233,6 +233,9 @@ _pkginfo.txt
 ClientBin/
 ~$*
 *~
+speech-translator-desktop.db
+speech-translator-desktop.db-shm
+speech-translator-desktop.db-wal
 *.dbmdl
 *.dbproj.schemaview
 *.jfm

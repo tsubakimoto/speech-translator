@@ -9,10 +9,10 @@ public sealed class EnvironmentSpeechCredentialsProvider : ISpeechCredentialsPro
         _environmentReader = environmentReader ?? Environment.GetEnvironmentVariable;
     }
 
-    public SpeechCredentialsResult GetCredentials()
+    public SpeechCredentialsResult GetCredentials(string? preferredRegion = null, string? preferredKey = null)
     {
-        var region = _environmentReader("SPEECH_REGION");
-        var key = _environmentReader("SPEECH_KEY");
+        var region = string.IsNullOrWhiteSpace(preferredRegion) ? _environmentReader("SPEECH_REGION") : preferredRegion.Trim();
+        var key = string.IsNullOrWhiteSpace(preferredKey) ? _environmentReader("SPEECH_KEY") : preferredKey.Trim();
         var missingVariables = new List<string>();
 
         if (string.IsNullOrWhiteSpace(region))
@@ -27,9 +27,12 @@ public sealed class EnvironmentSpeechCredentialsProvider : ISpeechCredentialsPro
 
         if (missingVariables.Count > 0)
         {
-            return SpeechCredentialsResult.Failure($"Required environment variables are missing: {string.Join(", ", missingVariables)}");
+            return SpeechCredentialsResult.Failure($"Azure AI Service の認証情報が未設定です。設定画面で保存するか、環境変数を設定してください: {string.Join(", ", missingVariables)}");
         }
 
-        return SpeechCredentialsResult.Success(new SpeechCredentials(region!, key!));
+        var normalizedRegion = region!.Trim();
+        var normalizedKey = key!.Trim();
+
+        return SpeechCredentialsResult.Success(new SpeechCredentials(normalizedRegion, normalizedKey));
     }
 }
