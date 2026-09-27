@@ -67,3 +67,36 @@ dotnet test --project ./tests/SpeechTranslatorDesktop.Tests -f net10.0 --filter-
 Unless packages have been changed, or it's the first time building the solution, add `--no-restore` to the build command to skip this step and speed up builds.
 
 Just remember to run `dotnet restore` after pulling changes, making changes to project references, or when building for the first time.
+
+### Microsoft Testing Platform (MTP)
+
+Tests use the [Microsoft Testing Platform](https://learn.microsoft.com/dotnet/core/testing/unit-testing-platform-intro) via xUnit v3. Key differences from the legacy VSTest runner:
+
+- **`dotnet test` requires `--project`** to specify a test project directly (positional arguments are no longer supported).
+- **Test output** uses the MTP format (e.g., `[✓112/x0/↓0]` progress and `Test run summary: Passed!`).
+- **TRX reports** use `--report-xunit-trx` instead of `--logger trx`.
+- **Code coverage** uses `Microsoft.Testing.Extensions.CodeCoverage` with `--coverage --coverage-output-format cobertura`.
+- **Running a test project directly** is supported via `dotnet run --project <test-project>`. This bypasses the `dotnet test` infrastructure and runs the test executable directly with the MTP command line.
+
+- **Running tests across the solution** with a filter may cause some projects to match zero tests, which MTP treats as a failure (exit code 8). Use `--ignore-exit-code 8` to suppress this:
+
+```bash
+# Run all unit tests across the solution, ignoring projects with no matching tests
+dotnet test --solution ./speech-translator.slnx --no-build -f net10.0 --ignore-exit-code 8
+```
+
+- **Running tests with `--solution` for a specific TFM** requires all projects in the solution to support that TFM. Not all projects target every framework (e.g., some are `net10.0`-only).
+
+```bash
+# Run tests via dotnet test (uses MTP under the hood)
+dotnet test --project ./tests/SpeechTranslatorDesktop.Tests -f net10.0
+
+# Run tests with code coverage (Cobertura format)
+dotnet test --project ./tests/SpeechTranslatorDesktop.Tests -f net10.0 --coverage --coverage-output-format cobertura --coverage-settings ./tests/coverage.runsettings
+
+# Run tests directly via dotnet run (MTP native command line)
+dotnet run --project ./tests/SpeechTranslatorDesktop.Tests -f net10.0
+
+# Show MTP command line help
+dotnet run --project ./tests/SpeechTranslatorDesktop.Tests -f net10.0 -- -?
+```
