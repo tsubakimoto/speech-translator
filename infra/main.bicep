@@ -14,7 +14,7 @@ param sku string = 'S0'
 var uniqueSuffix = uniqueString(subscription().id, resourceGroupName)
 
 resource resourceGroup 'Microsoft.Resources/resourceGroups@2025-04-01' = {
-  name: '${resourceGroupName}-${uniqueSuffix}'
+  name: 'rg-${resourceGroupName}-${uniqueSuffix}'
   location: location
 }
 
@@ -22,11 +22,13 @@ module foundry 'foundry.bicep' = {
   name: 'foundry-${uniqueSuffix}'
   scope: resourceGroup
   params: {
-    name: 'aif-${uniqueSuffix}'
+    foundryName: 'aif-${uniqueSuffix}'
+    projectName: 'proj-${uniqueSuffix}'
     location: location
     sku: sku
   }
 }
 
 output resourceGroupName string = resourceGroup.name
-output foundryName string = foundry.outputs.name
+output foundryName string = foundry.outputs.foundryName
+output projectName string = foundry.outputs.projectName
