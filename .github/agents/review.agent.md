@@ -2,6 +2,7 @@
 name: Review Agent
 description: 実装内容をレビューし、建設的なフィードバックを提供します。
 tools: [read, search, web, todo, ms-vscode.vscode-websearchforcopilot/websearch]
+model: Claude Sonnet 4.6 (copilot)
 ---
 
 # Review Agent
