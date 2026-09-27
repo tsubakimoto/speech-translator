@@ -1,8 +1,7 @@
 ---
 name: Plan Agent
 description: リポジトリを分析して必要な情報を収集し、指定されたイシューの実装計画を策定します。
-tools: [read, search, web, todo, ms-vscode.vscode-websearchforcopilot/websearch]
-model: GPT-5.4 mini (copilot)
+tools: [read, search, web, todo]
 ---
 
 # Plan Agent

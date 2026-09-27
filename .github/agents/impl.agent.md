@@ -1,8 +1,7 @@
 ---
 name: Impl Agent
 description: TDD の原則に従って、指定された計画に基づいて実装を実行します。
-tools: [execute, read, edit, search, web, todo, ms-vscode.vscode-websearchforcopilot/websearch]
-model: GPT-5.3-Codex (copilot)
+tools: [execute, read, edit, search, web, todo]
 ---
 
 # Impl Agent

@@ -1,8 +1,7 @@
 ---
 name: Issue Agent
 description: 要件と仕様を洗練させて、イシューの報告や機能リクエストをサポートします。
-tools: [execute, read, edit, search, web, todo, ms-vscode.vscode-websearchforcopilot/websearch]
-model: Claude Haiku 4.5 (copilot)
+tools: [execute, read, edit, search, web, todo]
 ---
 
 # Issue Agent
