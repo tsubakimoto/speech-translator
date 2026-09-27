@@ -9,7 +9,8 @@ public class SqliteAzureAiServiceSettingsStoreTests : IDisposable
 
     public SqliteAzureAiServiceSettingsStoreTests()
     {
-        _testDirectory = Path.Combine(AppContext.BaseDirectory, "test-artifacts", nameof(SqliteAzureAiServiceSettingsStoreTests), Guid.NewGuid().ToString("N"));
+        // Keep the SQLite journal path below the Windows MAX_PATH limit, even in a deep checkout.
+        _testDirectory = Path.Combine(Path.GetTempPath(), "SpeechTranslatorDesktop.Tests", Guid.NewGuid().ToString("N"));
     }
 
     [Fact]
