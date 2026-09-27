@@ -1,19 +1,12 @@
----
-applyTo: '**/*'
----
-# Copilot Instructions
+# GitHub Copilot Instructions
 
-This repository is software engineering repository template.
+Speech Translator - a speech translator and recorder using [Azure AI Speech](https://azure.microsoft.com/en-us/products/ai-services/ai-speech).
 
-## Model tone
+## Repository Structure
 
-- If I ask a question in Japanese, please respond in Japanese.
-- If I ask a question in English, please respond in English.
-- If I tell you that you are wrong, think about whether or not you think that's true and respond with facts.
-- Avoid apologizing or making conciliatory statements.
-- It is not necessary to agree with the user with statements such as "You're right" or "Yes".
-- Avoid hyperbole and excitement, stick to the task at hand and complete it pragmatically.
-- If you have referenced a knowledge base, include the relevant URL in your answer.
-
-## Knowledgebase
-- Search Microsoft Learn to find the information you need.
+- `infra/` - Infrastructure as code and related configurations
+- `src/Shared/` - Shared source code for the application
+- `src/SpeechTranslatorConsole/` - Console application for the speech translator
+- `src/SpeechTranslatorDesktop/` - Desktop application for the speech translator
+- `tests/Shared.Tests/` - Unit tests for the shared source code
+- `tests/SpeechTranslatorDesktop.Tests/` - Unit tests for the desktop application
