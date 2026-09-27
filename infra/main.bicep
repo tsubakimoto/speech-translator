@@ -11,10 +11,11 @@ param location string
 ])
 param sku string = 'S0'
 
+var abbreviations = loadJsonContent('./abbreviations.json')
 var uniqueSuffix = uniqueString(subscription().id, resourceGroupName)
 
 resource resourceGroup 'Microsoft.Resources/resourceGroups@2025-04-01' = {
-  name: 'rg-${resourceGroupName}-${uniqueSuffix}'
+  name: '${abbreviations.resourcesResourceGroups}${resourceGroupName}-${uniqueSuffix}'
   location: location
 }
 
@@ -22,8 +23,8 @@ module foundry 'foundry.bicep' = {
   name: 'foundry-${uniqueSuffix}'
   scope: resourceGroup
   params: {
-    foundryName: 'aif-${uniqueSuffix}'
-    projectName: 'proj-${uniqueSuffix}'
+    foundryName: '${abbreviations.aiFoundryAccount}${uniqueSuffix}'
+    projectName: '${abbreviations.aiFoundryAccountProject}${uniqueSuffix}'
     location: location
     sku: sku
   }

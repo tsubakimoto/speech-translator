@@ -13,7 +13,7 @@ Deploy [the Bicep template](./infra/main.bicep) at subscription scope to create 
 az deployment sub create --location japaneast --template-file infra/main.bicep --parameters resourceGroupName=rg-speech-translator location=japaneast
 ```
 
-The resource group is named `<resourceGroupName>-<uniqueSuffix>` and the Foundry resource is named `aif-<uniqueSuffix>`. Both use the same deterministic suffix derived from the subscription ID and `resourceGroupName`. Choose a region that supports the Speech features you need. The API key and region for the apps are available from the created Foundry resource.
+The resource group is named `rg-<resourceGroupName>-<uniqueSuffix>`, the Foundry resource is named `aif-<uniqueSuffix>`, and its project is named `proj-<uniqueSuffix>`. Their prefixes come from [`infra/abbreviations.json`](./infra/abbreviations.json) (`resourcesResourceGroups`, `aiFoundryAccount`, and `aiFoundryAccountProject`, respectively). All three use the same deterministic suffix derived from the subscription ID and `resourceGroupName`. Choose a region that supports the Speech features you need. The API key and region for the apps are available from the created Foundry resource.
 
 ## How to use
 
