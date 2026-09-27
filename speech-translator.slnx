@@ -1,0 +1,11 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Shared/SpeechTranslatorShared.csproj" />
+    <Project Path="src/SpeechTranslatorConsole/SpeechTranslatorConsole.csproj" />
+    <Project Path="src/SpeechTranslatorDesktop/SpeechTranslatorDesktop.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Shared.Tests/SpeechTranslatorShared.Tests.csproj" />
+    <Project Path="tests/SpeechTranslator.Desktop.Tests/SpeechTranslator.Desktop.Tests.csproj" />
+  </Folder>
+</Solution>
