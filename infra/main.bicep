@@ -1,24 +1,32 @@
-@description('That name is the name of our application. It has to be unique.Type a name followed by your resource group name. (<name>-<resourceGroupName>)')
-param cognitiveServiceName string = 'cog-${uniqueString(resourceGroup().id)}'
+targetScope = 'subscription'
 
-@description('Location for all resources.')
-param location string = resourceGroup().location
+@description('Base name of the resource group. A shared unique suffix is appended to this and the Foundry resource name.')
+param resourceGroupName string
+
+@description('Location for the resource group and Microsoft Foundry resource.')
+param location string
 
 @allowed([
   'S0'
 ])
 param sku string = 'S0'
 
-resource cognitiveService 'Microsoft.CognitiveServices/accounts@2021-10-01' = {
-  name: cognitiveServiceName
+var uniqueSuffix = uniqueString(subscription().id, resourceGroupName)
+
+resource resourceGroup 'Microsoft.Resources/resourceGroups@2025-04-01' = {
+  name: '${resourceGroupName}-${uniqueSuffix}'
   location: location
-  sku: {
-    name: sku
-  }
-  kind: 'CognitiveServices'
-  properties: {
-    apiProperties: {
-      statisticsEnabled: false
-    }
+}
+
+module foundry 'foundry.bicep' = {
+  name: 'foundry-${uniqueSuffix}'
+  scope: resourceGroup
+  params: {
+    name: 'aif-${uniqueSuffix}'
+    location: location
+    sku: sku
   }
 }
+
+output resourceGroupName string = resourceGroup.name
+output foundryName string = foundry.outputs.name

@@ -5,10 +5,10 @@
     "location": {
       "value": "${AZURE_LOCATION}"
     },
-    "cognitiveServicesName": {
-      "value": "${AZURE_COGNITIVE_SERVICE_NAME}"
+    "resourceGroupName": {
+      "value": "${AZURE_RESOURCE_GROUP_NAME}"
     },
-    "cognitiveServicesSkuName": {
+    "sku": {
       "value": "S0"
     }
   }

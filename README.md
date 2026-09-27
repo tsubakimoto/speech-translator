@@ -5,11 +5,21 @@ This app is speech translator and recorder using [Azure AI Speech](https://azure
 
 - [.NET 10.0 SDK](https://dot.net/download)
 
+## Deploy Azure resources
+
+Deploy [the Bicep template](./infra/main.bicep) at subscription scope to create a resource group and a Microsoft Foundry resource (which provides Azure Speech):
+
+```powershell
+az deployment sub create --location japaneast --template-file infra/main.bicep --parameters resourceGroupName=rg-speech-translator location=japaneast
+```
+
+The resource group is named `<resourceGroupName>-<uniqueSuffix>` and the Foundry resource is named `aif-<uniqueSuffix>`. Both use the same deterministic suffix derived from the subscription ID and `resourceGroupName`. Choose a region that supports the Speech features you need. The API key and region for the apps are available from the created Foundry resource.
+
 ## How to use
 
 ### Console app
 
-1. Create Azure AI Speech resource. ([Bicep](./infra/main.bicep))
+1. Deploy the Microsoft Foundry resource as described above.
 2. Copy `Subscription Key` and `Region` from Azure Portal.
 3. Clone this repository.
 4. Create `src/SpeechTranslatorConsole/appsettings.Development.json`.
@@ -28,7 +38,7 @@ This app is speech translator and recorder using [Azure AI Speech](https://azure
 
 ### Desktop app (WPF)
 
-1. Create Azure AI Speech resource. ([Bicep](./infra/main.bicep))
+1. Deploy the Microsoft Foundry resource as described above.
 2. Set the microphone device for translation as the default input device.
 3. Run the desktop project.
    ```powershell
