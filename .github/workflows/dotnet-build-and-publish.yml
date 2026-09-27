@@ -32,13 +32,13 @@ jobs:
         "version=$version" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
 
     - name: Restore dependencies
-      run: dotnet restore speech-translator.sln
+      run: dotnet restore speech-translator.slnx
 
     - name: Build solution
-      run: dotnet build speech-translator.sln --configuration Release --no-restore
+      run: dotnet build speech-translator.slnx --configuration Release --no-restore
 
     - name: Test solution
-      run: dotnet test speech-translator.sln --configuration Release --no-build --verbosity normal
+      run: dotnet test speech-translator.slnx --configuration Release --no-build --verbosity normal
 
     - name: Publish Console
       run: dotnet publish src/SpeechTranslatorConsole/SpeechTranslatorConsole.csproj --configuration Release --no-build --output artifacts/publish/console
