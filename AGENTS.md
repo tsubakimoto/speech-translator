@@ -4,7 +4,12 @@ Instructions for AI coding agents working in the .NET codebase.
 
 ## Architectural Decision Records
 
-Architecture / Design に関する Plan および Implementation では、[`docs/adr/workflow.md`](docs/adr/workflow.md) に定義された ADR workflow に従う。
+- Architecture / Design に関する Plan および Implementation では、[`docs/adr/workflow.md`](docs/adr/workflow.md) に定義された ADR workflow に従う。
+- 実装前に `docs/adr/README.md` を確認する。
+- 関連する accepted ADR を設計上の制約として扱う。
+- ADRと矛盾する実装を行わない。
+- ADRの変更が必要な場合は、人間に確認する。
+- ADRの作成・変更は `docs/adr/README.md` に従う。
 
 ## Build, Test, and Lint Commands
 
