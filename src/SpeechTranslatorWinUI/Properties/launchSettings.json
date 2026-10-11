@@ -1,0 +1,10 @@
+﻿{
+  "profiles": {
+    "SpeechTranslatorWinUI (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "SpeechTranslatorWinUI (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}
