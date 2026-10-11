@@ -7,3 +7,7 @@ Speech Translator - a speech translator and recorder using [Azure AI Speech](htt
 - `infra/` - Infrastructure as code and related configurations
 - `src/` - Source code projects
 - `tests/` - Test projects
+
+## Architectural Decisions
+
+Architecture / Design decisions must follow the instructions defined in `AGENTS.md`.

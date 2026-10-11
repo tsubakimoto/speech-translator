@@ -2,6 +2,10 @@
 
 Instructions for AI coding agents working in the .NET codebase.
 
+## Architectural Decision Records
+
+Architecture / Design に関する Plan および Implementation では、[`docs/adr/workflow.md`](docs/adr/workflow.md) に定義された ADR workflow に従う。
+
 ## Build, Test, and Lint Commands
 
 See `./.github/skills/build-and-test/SKILL.md` for detailed instructions on building, testing, and linting projects.
