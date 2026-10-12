@@ -10,7 +10,8 @@ speech-translator/
 ├── src/
 │   ├── Shared/                      # Shared source code for the application
 │   ├── SpeechTranslatorConsole/     # Console application for the speech translator
-│   └── SpeechTranslatorDesktop/     # Desktop application for the speech translator
+│   ├── SpeechTranslatorDesktop/     # Desktop application for the speech translator
+│   └── SpeechTranslatorWinUI/       # WinUI application for the speech translator
 └── tests/                           # Unit and integration tests
 ```
 
