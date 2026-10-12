@@ -22,7 +22,7 @@ The resource group is named `rg-<resourceGroupName>-<uniqueSuffix>`, the Foundry
 1. Deploy the Microsoft Foundry resource as described above.
 2. Copy `Subscription Key` and `Region` from Azure Portal.
 3. Clone this repository.
-4. Create `src/SpeechTranslatorConsole/appsettings.Development.json`.
+4. Create `src/Tsubakimoto.SpeechTranslator.ConsoleApp/appsettings.Development.json`.
 5. Setup `appsettings.Development.json` like below.
     ```json
     {
@@ -33,7 +33,7 @@ The resource group is named `rg-<resourceGroupName>-<uniqueSuffix>`, the Foundry
     }
     ```
 6. Set the microphone device for translation as the default input device.
-7. Run `SpeechTranslatorConsole` project. (`dotnet run --project src/SpeechTranslatorConsole`)
+7. Run `Tsubakimoto.SpeechTranslator.ConsoleApp` project. (`dotnet run --project src/Tsubakimoto.SpeechTranslator.ConsoleApp`)
 8. Type file name in console.
 
 ### Desktop app (WPF)
@@ -42,7 +42,7 @@ The resource group is named `rg-<resourceGroupName>-<uniqueSuffix>`, the Foundry
 2. Set the microphone device for translation as the default input device.
 3. Run the desktop project.
    ```powershell
-   dotnet run --project src/SpeechTranslatorDesktop
+   dotnet run --project src/Tsubakimoto.SpeechTranslator.DesktopApp
    ```
 4. In the `Azure AI Service 設定` section, enter the Azure AI Speech `Region` and `API Key`, then click `保存`.
    - Settings are stored in SQLite at `%LocalAppData%\SpeechTranslatorDesktop\speech-translator-desktop.db`.
@@ -61,7 +61,7 @@ Recording files are saved as UTF-8 text files under `recordings/` relative to th
 
 ### Desktop app (WinUI 3)
 
-The independent packaged x64 WinUI implementation is in `src/SpeechTranslatorWinUI`. See its [README](src/SpeechTranslatorWinUI/README.md) for Windows/runtime prerequisites, settings/recovery, recording, build/test and local MSIX instructions. WPF remains unchanged.
+The independent packaged x64 WinUI implementation is in `src/Tsubakimoto.SpeechTranslator.WinUIApp`. See its [README](src/Tsubakimoto.SpeechTranslator.WinUIApp/README.md) for Windows/runtime prerequisites, settings/recovery, recording, build/test and local MSIX instructions. WPF remains unchanged.
 
 ## References
 

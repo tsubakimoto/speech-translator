@@ -1,13 +1,13 @@
 ﻿<Solution>
   <Folder Name="/src/">
-    <Project Path="src/Shared/SpeechTranslatorShared.csproj" />
-    <Project Path="src/SpeechTranslatorWinUI/SpeechTranslatorWinUI.csproj" />
-    <Project Path="src/SpeechTranslatorConsole/SpeechTranslatorConsole.csproj" />
-    <Project Path="src/SpeechTranslatorDesktop/SpeechTranslatorDesktop.csproj" />
+    <Project Path="src/Tsubakimoto.SpeechTranslator.Shared/Tsubakimoto.SpeechTranslator.Shared.csproj" />
+    <Project Path="src/Tsubakimoto.SpeechTranslator.WinUIApp/Tsubakimoto.SpeechTranslator.WinUIApp.csproj" />
+    <Project Path="src/Tsubakimoto.SpeechTranslator.ConsoleApp/Tsubakimoto.SpeechTranslator.ConsoleApp.csproj" />
+    <Project Path="src/Tsubakimoto.SpeechTranslator.DesktopApp/Tsubakimoto.SpeechTranslator.DesktopApp.csproj" />
   </Folder>
   <Folder Name="/tests/">
-    <Project Path="tests/Shared.Tests/SpeechTranslatorShared.Tests.csproj" />
-    <Project Path="tests/SpeechTranslator.WinUI.Tests/SpeechTranslator.WinUI.Tests.csproj" />
-    <Project Path="tests/SpeechTranslator.Desktop.Tests/SpeechTranslator.Desktop.Tests.csproj" />
+    <Project Path="tests/Tsubakimoto.SpeechTranslator.Shared.Tests/Tsubakimoto.SpeechTranslator.Shared.Tests.csproj" />
+    <Project Path="tests/Tsubakimoto.SpeechTranslator.WinUIApp.Tests/Tsubakimoto.SpeechTranslator.WinUIApp.Tests.csproj" />
+    <Project Path="tests/Tsubakimoto.SpeechTranslator.DesktopApp.Tests/Tsubakimoto.SpeechTranslator.DesktopApp.Tests.csproj" />
   </Folder>
 </Solution>
