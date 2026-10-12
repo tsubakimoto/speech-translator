@@ -8,11 +8,14 @@ description: Explains the project structure of the speech-translator solution
 ```
 speech-translator/
 ├── src/
-│   ├── Shared/                      # Shared source code for the application
-│   ├── SpeechTranslatorConsole/     # Console application for the speech translator
-│   ├── SpeechTranslatorDesktop/     # Desktop application for the speech translator
-│   └── SpeechTranslatorWinUI/       # WinUI application for the speech translator
-└── tests/                           # Unit and integration tests
+│   ├── Tsubakimoto.SpeechTranslator.Shared/            # Shared source code for the application
+│   ├── Tsubakimoto.SpeechTranslator.ConsoleApp/        # Console application for the speech translator
+│   ├── Tsubakimoto.SpeechTranslator.DesktopApp/        # WPF desktop application
+│   └── Tsubakimoto.SpeechTranslator.WinUIApp/          # WinUI application
+└── tests/
+    ├── Tsubakimoto.SpeechTranslator.Shared.Tests/
+    ├── Tsubakimoto.SpeechTranslator.DesktopApp.Tests/
+    └── Tsubakimoto.SpeechTranslator.WinUIApp.Tests/
 ```
 
 ## Main Folders
@@ -21,4 +24,4 @@ speech-translator/
 |--------|----------|
 | `infra/` | Infrastructure as code and related configurations |
 | `src/` | Source code projects |
-| `tests/` | Test projects — named `<Source-Code-Project>.Tests` |
+| `tests/` | Test projects named `<Source-Code-Project>.Tests` |
