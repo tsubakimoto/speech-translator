@@ -1,0 +1,5 @@
+﻿<Window x:Class="SpeechTranslatorWinUI.MainWindow" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+ <Grid x:Name="Root" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"><Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
+  <Grid Padding="24,12"><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions><TextBlock Text="Speech Translator" Style="{ThemeResource TitleTextBlockStyle}" VerticalAlignment="Center"/><Button Grid.Column="1" x:Name="PageButton" Content="設定" AutomationProperties.AutomationId="ChangePageButton" Click="ChangePageAsync"/></Grid><Frame x:Name="RootFrame" Grid.Row="1"/>
+ </Grid>
+</Window>

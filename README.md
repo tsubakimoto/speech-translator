@@ -59,6 +59,10 @@ The resource group is named `rg-<resourceGroupName>-<uniqueSuffix>`, the Foundry
 
 Recording files are saved as UTF-8 text files under `recordings/` relative to the desktop app executable directory.
 
+### Desktop app (WinUI 3)
+
+The independent packaged x64 WinUI implementation is in `src/SpeechTranslatorWinUI`. See its [README](src/SpeechTranslatorWinUI/README.md) for Windows/runtime prerequisites, settings/recovery, recording, build/test and local MSIX instructions. WPF remains unchanged.
+
 ## References
 
 - https://learn.microsoft.com/en-us/azure/ai-services/speech-service/language-identification
