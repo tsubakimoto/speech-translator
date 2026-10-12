@@ -28,6 +28,7 @@ See `./.github/skills/project-structure/SKILL.md` for an overview of the project
 - **Private classes**: Should be `sealed` unless subclassed
 - **Config**: Read from environment variables with `UPPER_SNAKE_CASE` naming
 - **Tests**: Add Arrange/Act/Assert comments; use NSubstitute for mocking; test methods returning `Task`/`ValueTask` must use the `Async` suffix.
+- **Assertions**: Use xUnit standard assertions throughout the repository, following [ADR-0031](docs/adr/0031-use-xunit-standard-assertions.md). Introducing another assertion library requires a human-approved design decision.
 
 ## Key Design Principles
 

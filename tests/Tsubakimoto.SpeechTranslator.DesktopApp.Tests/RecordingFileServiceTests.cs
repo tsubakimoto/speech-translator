@@ -1,4 +1,5 @@
-using System.Text;
+﻿using System.Text;
+
 using Tsubakimoto.SpeechTranslator.DesktopApp.Services;
 
 namespace Tsubakimoto.SpeechTranslator.DesktopApp.Tests;
@@ -10,23 +11,31 @@ public class RecordingFileServiceTests : IDisposable
     [Fact]
     public void AppendTranslation_FileNameProvided_WritesUtf8Recording()
     {
+        // Arrange
         var service = new RecordingFileService(_rootDirectory);
 
+        // Act
         service.AppendTranslation("session-01", "hello", "こんにちは");
 
         var filePath = Path.Combine(_rootDirectory, "recordings", "session-01.txt");
-        File.Exists(filePath).Should().BeTrue();
-        File.ReadAllText(filePath, Encoding.UTF8).Should().Contain("hello").And.Contain("こんにちは");
+        // Assert
+        Assert.True(File.Exists(filePath));
+        var recording = File.ReadAllText(filePath, Encoding.UTF8);
+        Assert.Contains("hello", recording);
+        Assert.Contains("こんにちは", recording);
     }
 
     [Fact]
     public void AppendTranslation_EmptyFileName_DoesNotCreateRecording()
     {
+        // Arrange
         var service = new RecordingFileService(_rootDirectory);
 
+        // Act
         service.AppendTranslation(string.Empty, "hello", "こんにちは");
 
-        Directory.Exists(Path.Combine(_rootDirectory, "recordings")).Should().BeFalse();
+        // Assert
+        Assert.False(Directory.Exists(Path.Combine(_rootDirectory, "recordings")));
     }
 
     [Theory]
@@ -40,32 +49,41 @@ public class RecordingFileServiceTests : IDisposable
     [InlineData("..")]
     public void AppendTranslation_InvalidFileName_ThrowsArgumentException(string fileName)
     {
+        // Arrange
         var service = new RecordingFileService(_rootDirectory);
 
+        // Act
         var act = () => service.AppendTranslation(fileName, "hello", "こんにちは");
 
-        act.Should().Throw<ArgumentException>();
-        Directory.Exists(Path.Combine(_rootDirectory, "recordings")).Should().BeFalse();
+        // Assert
+        Assert.ThrowsAny<ArgumentException>(act);
+        Assert.False(Directory.Exists(Path.Combine(_rootDirectory, "recordings")));
     }
 
     [Fact]
     public void NormalizeFileName_ValidFileName_ReturnsTrimmedValue()
     {
+        // Arrange
         var service = new RecordingFileService(_rootDirectory);
 
+        // Act
         var normalized = service.NormalizeFileName(" session-01 ");
 
-        normalized.Should().Be("session-01");
+        // Assert
+        Assert.Equal("session-01", normalized);
     }
 
     [Fact]
     public void NormalizeFileName_WhitespaceOnly_ReturnsNull()
     {
+        // Arrange
         var service = new RecordingFileService(_rootDirectory);
 
+        // Act
         var normalized = service.NormalizeFileName("   ");
 
-        normalized.Should().BeNull();
+        // Assert
+        Assert.Null(normalized);
     }
 
     public void Dispose()

@@ -1,4 +1,5 @@
-using System.Windows.Input;
+﻿using System.Windows.Input;
+
 using Tsubakimoto.SpeechTranslator.DesktopApp.Commands;
 using Tsubakimoto.SpeechTranslator.DesktopApp.Models;
 using Tsubakimoto.SpeechTranslator.DesktopApp.Services;
@@ -12,59 +13,73 @@ public class MainViewModelTests
     [Fact]
     public void InitialState_StartEnabled_StopDisabled()
     {
+        // Arrange
+        // Act
         var viewModel = CreateViewModel();
 
-        viewModel.StartCommand.CanExecute(null).Should().BeTrue();
-        viewModel.StopCommand.CanExecute(null).Should().BeFalse();
+        // Assert
+        Assert.True(viewModel.StartCommand.CanExecute(null));
+        Assert.False(viewModel.StopCommand.CanExecute(null));
     }
 
     [Fact]
-    public async Task Start_WhenCredentialsMissing_ShowsErrorAndDoesNotStart()
+    public async Task Start_WhenCredentialsMissing_ShowsErrorAndDoesNotStartAsync()
     {
+        // Arrange
         var translationController = new FakeTranslationController();
         var viewModel = CreateViewModel(
             credentialsProvider: new FakeSpeechCredentialsProvider(SpeechCredentialsResult.Failure("Missing SPEECH_REGION and SPEECH_KEY.")),
             translationController: translationController);
 
+        // Act
         await ExecuteAsync(viewModel.StartCommand);
 
-        translationController.StartCallCount.Should().Be(0);
-        viewModel.StatusMessage.Should().Contain("SPEECH_REGION").And.Contain("SPEECH_KEY");
-        viewModel.IsRunning.Should().BeFalse();
+        // Assert
+        Assert.Equal(0, translationController.StartCallCount);
+        Assert.Contains("SPEECH_REGION", viewModel.StatusMessage);
+        Assert.Contains("SPEECH_KEY", viewModel.StatusMessage);
+        Assert.False(viewModel.IsRunning);
     }
 
     [Fact]
-    public async Task InitializeAsync_WhenSavedSettingsExist_LoadsThemIntoViewModel()
+    public async Task InitializeAsync_WhenSavedSettingsExist_LoadsThemIntoViewModelAsync()
     {
+        // Arrange
         var viewModel = CreateViewModel(
             settingsStore: new FakeAzureAiServiceSettingsStore
             {
                 LoadedSettings = new AzureAiServiceSettings("japaneast", "saved-key")
             });
 
+        // Act
         await viewModel.InitializeAsync();
 
-        viewModel.AzureRegion.Should().Be("japaneast");
-        viewModel.AzureApiKey.Should().Be("saved-key");
-        viewModel.SettingsStatusMessage.Should().Contain("読み込み");
+        // Assert
+        Assert.Equal("japaneast", viewModel.AzureRegion);
+        Assert.Equal("saved-key", viewModel.AzureApiKey);
+        Assert.Contains("読み込み", viewModel.SettingsStatusMessage);
     }
 
     [Fact]
-    public async Task InitializeAsync_WhenSavedSettingsDoNotExist_ShowsGuidance()
+    public async Task InitializeAsync_WhenSavedSettingsDoNotExist_ShowsGuidanceAsync()
     {
+        // Arrange
         var viewModel = CreateViewModel();
 
+        // Act
         await viewModel.InitializeAsync();
 
-        viewModel.AzureRegion.Should().BeEmpty();
-        viewModel.AzureApiKey.Should().BeEmpty();
-        viewModel.SettingsStatusMessage.Should().Contain("保存");
-        viewModel.SettingsStatusMessage.Should().Contain("SPEECH_REGION");
+        // Assert
+        Assert.Empty(viewModel.AzureRegion);
+        Assert.Empty(viewModel.AzureApiKey);
+        Assert.Contains("保存", viewModel.SettingsStatusMessage);
+        Assert.Contains("SPEECH_REGION", viewModel.SettingsStatusMessage);
     }
 
     [Fact]
-    public async Task InitializeAsync_OnFirstLaunchWithMissingSettingsDatabase_ShowsGuidanceInsteadOfFailure()
+    public async Task InitializeAsync_OnFirstLaunchWithMissingSettingsDatabase_ShowsGuidanceInsteadOfFailureAsync()
     {
+        // Arrange
         var testDirectory = Path.Combine(
             AppContext.BaseDirectory,
             "test-artifacts",
@@ -77,11 +92,13 @@ public class MainViewModelTests
             var viewModel = CreateViewModel(
                 settingsStore: new SqliteAzureAiServiceSettingsStore(databasePath, new FakeSecretProtector()));
 
+            // Act
             await viewModel.InitializeAsync();
 
-            viewModel.SettingsStatusMessage.Should().Contain("保存");
-            viewModel.SettingsStatusMessage.Should().Contain("SPEECH_REGION");
-            viewModel.SettingsStatusMessage.Should().NotContain("失敗");
+            // Assert
+            Assert.Contains("保存", viewModel.SettingsStatusMessage);
+            Assert.Contains("SPEECH_REGION", viewModel.SettingsStatusMessage);
+            Assert.DoesNotContain("失敗", viewModel.SettingsStatusMessage);
         }
         finally
         {
@@ -93,52 +110,64 @@ public class MainViewModelTests
     }
 
     [Fact]
-    public async Task SaveSettings_WhenValuesAreValid_PersistsThem()
+    public async Task SaveSettings_WhenValuesAreValid_PersistsThemAsync()
     {
+        // Arrange
         var settingsStore = new FakeAzureAiServiceSettingsStore();
         var viewModel = CreateViewModel(settingsStore: settingsStore);
         viewModel.AzureRegion = "japaneast";
         viewModel.AzureApiKey = "saved-key";
 
+        // Act
         await ExecuteAsync(viewModel.SaveSettingsCommand);
 
-        settingsStore.SaveCallCount.Should().Be(1);
-        settingsStore.SavedSettings.Should().BeEquivalentTo(new AzureAiServiceSettings("japaneast", "saved-key"));
-        viewModel.SettingsStatusMessage.Should().Contain("保存");
+        // Assert
+        Assert.Equal(1, settingsStore.SaveCallCount);
+        Assert.NotNull(settingsStore.SavedSettings);
+        Assert.Equal("japaneast", settingsStore.SavedSettings.Region);
+        Assert.Equal("saved-key", settingsStore.SavedSettings.ApiKey);
+        Assert.Contains("保存", viewModel.SettingsStatusMessage);
     }
 
     [Fact]
-    public async Task SaveSettings_WhenValuesAreMissing_ShowsValidationError()
+    public async Task SaveSettings_WhenValuesAreMissing_ShowsValidationErrorAsync()
     {
+        // Arrange
         var settingsStore = new FakeAzureAiServiceSettingsStore();
         var viewModel = CreateViewModel(settingsStore: settingsStore);
         viewModel.AzureRegion = "japaneast";
         viewModel.AzureApiKey = "";
 
+        // Act
         await ExecuteAsync(viewModel.SaveSettingsCommand);
 
-        settingsStore.SaveCallCount.Should().Be(0);
-        viewModel.SettingsStatusMessage.Should().Contain("API キー");
+        // Assert
+        Assert.Equal(0, settingsStore.SaveCallCount);
+        Assert.Contains("API キー", viewModel.SettingsStatusMessage);
     }
 
     [Fact]
-    public async Task Start_WhenCredentialsPresent_StartsTranslation()
+    public async Task Start_WhenCredentialsPresent_StartsTranslationAsync()
     {
+        // Arrange
         var translationController = new FakeTranslationController();
         var viewModel = CreateViewModel(translationController: translationController);
 
+        // Act
         await ExecuteAsync(viewModel.StartCommand);
 
-        translationController.StartCallCount.Should().Be(1);
-        viewModel.StatusMessage.Should().Be("開始");
-        viewModel.IsRunning.Should().BeTrue();
-        viewModel.StartCommand.CanExecute(null).Should().BeFalse();
-        viewModel.StopCommand.CanExecute(null).Should().BeTrue();
+        // Assert
+        Assert.Equal(1, translationController.StartCallCount);
+        Assert.Equal("開始", viewModel.StatusMessage);
+        Assert.True(viewModel.IsRunning);
+        Assert.False(viewModel.StartCommand.CanExecute(null));
+        Assert.True(viewModel.StopCommand.CanExecute(null));
     }
 
     [Fact]
-    public async Task Start_WhenConfiguredCredentialsPresent_PassesThemToController()
+    public async Task Start_WhenConfiguredCredentialsPresent_PassesThemToControllerAsync()
     {
+        // Arrange
         var translationController = new FakeTranslationController();
         var viewModel = CreateViewModel(
             credentialsProvider: new FakeSpeechCredentialsProvider(SpeechCredentialsResult.Success(new SpeechCredentials("ui-region", "ui-key"))),
@@ -146,14 +175,19 @@ public class MainViewModelTests
         viewModel.AzureRegion = "ui-region";
         viewModel.AzureApiKey = "ui-key";
 
+        // Act
         await ExecuteAsync(viewModel.StartCommand);
 
-        translationController.LastStartCredentials.Should().BeEquivalentTo(new SpeechCredentials("ui-region", "ui-key"));
+        // Assert
+        Assert.NotNull(translationController.LastStartCredentials);
+        Assert.Equal("ui-region", translationController.LastStartCredentials.Region);
+        Assert.Equal("ui-key", translationController.LastStartCredentials.Key);
     }
 
     [Fact]
-    public async Task Start_WhenRecordingFileNameIsInvalid_ShowsErrorAndDoesNotStart()
+    public async Task Start_WhenRecordingFileNameIsInvalid_ShowsErrorAndDoesNotStartAsync()
     {
+        // Arrange
         var translationController = new FakeTranslationController();
         var workerFactory = new FakeDesktopTranslationWorkerFactory(new FakeDesktopTranslationWorker());
         var viewModel = CreateViewModel(
@@ -165,32 +199,38 @@ public class MainViewModelTests
             workerFactory: workerFactory);
         viewModel.RecordingFileName = "bad name";
 
+        // Act
         await ExecuteAsync(viewModel.StartCommand);
 
-        translationController.StartCallCount.Should().Be(0);
-        workerFactory.CreateCallCount.Should().Be(0);
-        viewModel.IsRunning.Should().BeFalse();
-        viewModel.StatusMessage.Should().StartWith("記録ファイル名が不正です:");
-        viewModel.ActivityLogs.Should().Contain(viewModel.StatusMessage);
+        // Assert
+        Assert.Equal(0, translationController.StartCallCount);
+        Assert.Equal(0, workerFactory.CreateCallCount);
+        Assert.False(viewModel.IsRunning);
+        Assert.StartsWith("記録ファイル名が不正です:", viewModel.StatusMessage);
+        Assert.Contains(viewModel.StatusMessage, viewModel.ActivityLogs);
     }
 
     [Fact]
-    public async Task Stop_CallsTranslationController()
+    public async Task Stop_CallsTranslationControllerAsync()
     {
+        // Arrange
         var translationController = new FakeTranslationController();
         var viewModel = CreateViewModel(translationController: translationController);
 
+        // Act
         await ExecuteAsync(viewModel.StartCommand);
         await ExecuteAsync(viewModel.StopCommand);
 
-        translationController.StopCallCount.Should().Be(1);
-        viewModel.StatusMessage.Should().Be("停止");
-        viewModel.IsRunning.Should().BeFalse();
+        // Assert
+        Assert.Equal(1, translationController.StopCallCount);
+        Assert.Equal("停止", viewModel.StatusMessage);
+        Assert.False(viewModel.IsRunning);
     }
 
     [Fact]
-    public async Task Stop_WhenControllerThrows_ShowsErrorAndKeepsRunning()
+    public async Task Stop_WhenControllerThrows_ShowsErrorAndKeepsRunningAsync()
     {
+        // Arrange
         var translationController = new FakeTranslationController
         {
             StopException = new InvalidOperationException("stop failed"),
@@ -198,51 +238,60 @@ public class MainViewModelTests
         };
         var viewModel = CreateViewModel(translationController: translationController);
 
+        // Act
         await ExecuteAsync(viewModel.StartCommand);
         await ExecuteAsync(viewModel.StopCommand);
 
-        viewModel.StatusMessage.Should().Be("停止に失敗しました: stop failed");
-        viewModel.ActivityLogs.Should().Contain("停止に失敗しました: stop failed");
-        viewModel.IsRunning.Should().BeTrue();
-        viewModel.StartCommand.CanExecute(null).Should().BeFalse();
-        viewModel.StopCommand.CanExecute(null).Should().BeTrue();
+        // Assert
+        Assert.Equal("停止に失敗しました: stop failed", viewModel.StatusMessage);
+        Assert.Contains("停止に失敗しました: stop failed", viewModel.ActivityLogs);
+        Assert.True(viewModel.IsRunning);
+        Assert.False(viewModel.StartCommand.CanExecute(null));
+        Assert.True(viewModel.StopCommand.CanExecute(null));
     }
 
     [Fact]
-    public async Task WorkerTranslationEvent_AddsTranslationLog()
+    public async Task WorkerTranslationEvent_AddsTranslationLogAsync()
     {
+        // Arrange
         var worker = new FakeDesktopTranslationWorker();
         var viewModel = CreateViewModel(workerFactory: new FakeDesktopTranslationWorkerFactory(worker));
 
+        // Act
         await ExecuteAsync(viewModel.StartCommand);
         worker.RaiseTranslationLogged(new TranslationLogItem("hello", "こんにちは"));
 
-        viewModel.TranslationLogs.Should().ContainSingle();
-        viewModel.TranslationLogs[0].SourceText.Should().Be("hello");
-        viewModel.TranslationLogs[0].TranslatedText.Should().Be("こんにちは");
+        // Assert
+        Assert.Single(viewModel.TranslationLogs);
+        Assert.Equal("hello", viewModel.TranslationLogs[0].SourceText);
+        Assert.Equal("こんにちは", viewModel.TranslationLogs[0].TranslatedText);
     }
 
     [Fact]
-    public async Task WorkerStatusEvents_UpdateStatusAndLogs()
+    public async Task WorkerStatusEvents_UpdateStatusAndLogsAsync()
     {
+        // Arrange
         var worker = new FakeDesktopTranslationWorker();
         var viewModel = CreateViewModel(workerFactory: new FakeDesktopTranslationWorkerFactory(worker));
 
+        // Act
         await ExecuteAsync(viewModel.StartCommand);
         worker.RaiseStatusChanged(DesktopTranslationStatus.NoMatch, "NoMatch");
         worker.RaiseMessageLogged("Session stopped.");
         worker.RaiseStatusChanged(DesktopTranslationStatus.SessionStopped, "セッション停止");
 
-        viewModel.StatusMessage.Should().Be("セッション停止");
-        viewModel.ActivityLogs.Should().Contain("Session stopped.");
-        viewModel.IsRunning.Should().BeFalse();
+        // Assert
+        Assert.Equal("セッション停止", viewModel.StatusMessage);
+        Assert.Contains("Session stopped.", viewModel.ActivityLogs);
+        Assert.False(viewModel.IsRunning);
     }
 
     [Fact]
-    public async Task Start_WhenControllerCompletesAsynchronously_RaisesPropertyChangesOnCapturedContext()
+    public async Task Start_WhenControllerCompletesAsynchronously_RaisesPropertyChangesOnCapturedContextAsync()
     {
         await RunOnSynchronizationContextAsync(async uiThreadId =>
         {
+            // Arrange
             var translationController = new FakeTranslationController { StartShouldYield = true };
             var viewModel = CreateViewModel(
                 dispatcher: new SynchronizationContextDispatcher(SynchronizationContext.Current!),
@@ -256,18 +305,21 @@ public class MainViewModelTests
                 }
             };
 
+            // Act
             await ExecuteAsync(viewModel.StartCommand);
 
-            propertyChangedThreadIds.Should().NotBeEmpty();
-            propertyChangedThreadIds.Should().OnlyContain(threadId => threadId == uiThreadId);
+            // Assert
+            Assert.NotEmpty(propertyChangedThreadIds);
+            Assert.All(propertyChangedThreadIds, threadId => Assert.Equal(uiThreadId, threadId));
         });
     }
 
     [Fact]
-    public async Task WorkerTranslationEvent_FromBackgroundThread_UpdatesCollectionOnUiThread()
+    public async Task WorkerTranslationEvent_FromBackgroundThread_UpdatesCollectionOnUiThreadAsync()
     {
         await RunOnSynchronizationContextAsync(async uiThreadId =>
         {
+            // Arrange
             var worker = new FakeDesktopTranslationWorker();
             var viewModel = CreateViewModel(
                 dispatcher: new SynchronizationContextDispatcher(SynchronizationContext.Current!),
@@ -276,11 +328,13 @@ public class MainViewModelTests
 
             viewModel.TranslationLogs.CollectionChanged += (_, _) => collectionChangedThreadId = Environment.CurrentManagedThreadId;
 
+            // Act
             await ExecuteAsync(viewModel.StartCommand);
             await Task.Run(() => worker.RaiseTranslationLogged(new TranslationLogItem("hello", "こんにちは")));
 
-            collectionChangedThreadId.Should().Be(uiThreadId);
-            viewModel.TranslationLogs.Should().ContainSingle();
+            // Assert
+            Assert.Equal(uiThreadId, collectionChangedThreadId);
+            Assert.Single(viewModel.TranslationLogs);
         });
     }
 

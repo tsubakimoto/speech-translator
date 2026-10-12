@@ -1,4 +1,5 @@
-using Microsoft.Data.Sqlite;
+﻿using Microsoft.Data.Sqlite;
+
 using Tsubakimoto.SpeechTranslator.DesktopApp.Services;
 
 namespace Tsubakimoto.SpeechTranslator.DesktopApp.Tests;
@@ -14,41 +15,49 @@ public class SqliteAzureAiServiceSettingsStoreTests : IDisposable
     }
 
     [Fact]
-    public async Task SaveAsync_ThenLoadAsync_RoundTripsSettings()
+    public async Task SaveAsync_ThenLoadAsync_RoundTripsSettingsAsync()
     {
+        // Arrange
         var databasePath = Path.Combine(_testDirectory, "speech-translator-desktop.db");
         var protector = new FakeSecretProtector();
         var store = new SqliteAzureAiServiceSettingsStore(databasePath, protector);
 
+        // Act
         await store.SaveAsync(new AzureAiServiceSettings("japaneast", "plain-text-key"));
         var settings = await store.LoadAsync();
 
-        settings.Should().NotBeNull();
-        settings!.Region.Should().Be("japaneast");
-        settings.ApiKey.Should().Be("plain-text-key");
+        // Assert
+        Assert.NotNull(settings);
+        Assert.Equal("japaneast", settings!.Region);
+        Assert.Equal("plain-text-key", settings.ApiKey);
     }
 
     [Fact]
-    public async Task LoadAsync_WhenDirectoryAndDatabaseDoNotExist_ReturnsNull()
+    public async Task LoadAsync_WhenDirectoryAndDatabaseDoNotExist_ReturnsNullAsync()
     {
+        // Arrange
         var databasePath = Path.Combine(_testDirectory, "nested", "speech-translator-desktop.db");
         var protector = new FakeSecretProtector();
         var store = new SqliteAzureAiServiceSettingsStore(databasePath, protector);
 
+        // Act
         var settings = await store.LoadAsync();
 
-        settings.Should().BeNull();
-        Directory.Exists(Path.GetDirectoryName(databasePath)!).Should().BeFalse();
-        File.Exists(databasePath).Should().BeFalse();
+        // Assert
+        Assert.Null(settings);
+        Assert.False(Directory.Exists(Path.GetDirectoryName(databasePath)!));
+        Assert.False(File.Exists(databasePath));
     }
 
     [Fact]
-    public async Task SaveAsync_StoresProtectedApiKeyInsteadOfPlainText()
+    public async Task SaveAsync_StoresProtectedApiKeyInsteadOfPlainTextAsync()
     {
+        // Arrange
         var databasePath = Path.Combine(_testDirectory, "speech-translator-desktop.db");
         var protector = new FakeSecretProtector();
         var store = new SqliteAzureAiServiceSettingsStore(databasePath, protector);
 
+        // Act
         await store.SaveAsync(new AzureAiServiceSettings("japaneast", "plain-text-key"));
 
         var connectionStringBuilder = new SqliteConnectionStringBuilder
@@ -64,8 +73,9 @@ public class SqliteAzureAiServiceSettingsStoreTests : IDisposable
         command.CommandText = "SELECT protected_api_key FROM azure_ai_service_settings WHERE id = 1;";
         var storedValue = (byte[])(await command.ExecuteScalarAsync())!;
 
-        storedValue.Should().NotBeEmpty();
-        storedValue.Should().NotEqual(Encoding.UTF8.GetBytes("plain-text-key"));
+        // Assert
+        Assert.NotEmpty(storedValue);
+        Assert.NotEqual<byte>(Encoding.UTF8.GetBytes("plain-text-key"), storedValue);
     }
 
     public void Dispose()

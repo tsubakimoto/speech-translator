@@ -1,4 +1,4 @@
-using Tsubakimoto.SpeechTranslator.DesktopApp.Services;
+﻿using Tsubakimoto.SpeechTranslator.DesktopApp.Services;
 using Tsubakimoto.SpeechTranslator.Shared;
 
 namespace Tsubakimoto.SpeechTranslator.DesktopApp.Tests;
@@ -6,8 +6,9 @@ namespace Tsubakimoto.SpeechTranslator.DesktopApp.Tests;
 public class DesktopTranslationControllerTests
 {
     [Fact]
-    public async Task StopAsync_WhenSessionStopFails_KeepsControllerRunning()
+    public async Task StopAsync_WhenSessionStopFails_KeepsControllerRunningAsync()
     {
+        // Arrange
         var session = new FakeTranslationSession();
         session.EnqueueStopBehavior(() => throw new InvalidOperationException("stop failed"));
         session.EnqueueStopBehavior(() =>
@@ -17,24 +18,25 @@ public class DesktopTranslationControllerTests
         });
         var controller = CreateController(session);
 
+        // Act
         await controller.StartAsync(new SpeechCredentials("japaneast", "test-key"), "en-US", "ja-JP", new NoOpTranslationRecognizerWorker());
-        await FluentActions.Awaiting(() => controller.StopAsync())
-            .Should()
-            .ThrowAsync<InvalidOperationException>()
-            .WithMessage("stop failed");
+        // Assert
+        var exception = await Assert.ThrowsAnyAsync<InvalidOperationException>(() => controller.StopAsync());
+        Assert.Equal("stop failed", exception.Message, ignoreCase: true);
 
-        controller.IsRunning.Should().BeTrue();
-        session.DisposeCallCount.Should().Be(0);
+        Assert.True(controller.IsRunning);
+        Assert.Equal(0, session.DisposeCallCount);
 
         await controller.StopAsync();
 
-        controller.IsRunning.Should().BeFalse();
-        session.DisposeCallCount.Should().Be(1);
+        Assert.False(controller.IsRunning);
+        Assert.Equal(1, session.DisposeCallCount);
     }
 
     [Fact]
-    public async Task StartAsync_AfterStopFailure_ThrowsWhileOriginalSessionIsTracked()
+    public async Task StartAsync_AfterStopFailure_ThrowsWhileOriginalSessionIsTrackedAsync()
     {
+        // Arrange
         var session = new FakeTranslationSession();
         session.EnqueueStopBehavior(() => throw new InvalidOperationException("stop failed"));
         session.EnqueueStopBehavior(() =>
@@ -44,21 +46,22 @@ public class DesktopTranslationControllerTests
         });
         var controller = CreateController(session);
 
+        // Act
         await controller.StartAsync(new SpeechCredentials("japaneast", "test-key"), "en-US", "ja-JP", new NoOpTranslationRecognizerWorker());
-        await FluentActions.Awaiting(() => controller.StopAsync()).Should().ThrowAsync<InvalidOperationException>();
+        // Assert
+        await Assert.ThrowsAnyAsync<InvalidOperationException>(() => controller.StopAsync());
 
-        await FluentActions.Awaiting(() => controller.StartAsync(new SpeechCredentials("japaneast", "test-key"), "en-US", "ja-JP", new NoOpTranslationRecognizerWorker()))
-            .Should()
-            .ThrowAsync<InvalidOperationException>()
-            .WithMessage("Translation is already running.");
+        var exception = await Assert.ThrowsAnyAsync<InvalidOperationException>(() => controller.StartAsync(new SpeechCredentials("japaneast", "test-key"), "en-US", "ja-JP", new NoOpTranslationRecognizerWorker()));
+        Assert.Equal("Translation is already running.", exception.Message, ignoreCase: true);
 
         await controller.StopAsync();
-        controller.IsRunning.Should().BeFalse();
+        Assert.False(controller.IsRunning);
     }
 
     [Fact]
-    public async Task StopAsync_WhenDisposeFails_KeepsControllerRunningUntilRetrySucceeds()
+    public async Task StopAsync_WhenDisposeFails_KeepsControllerRunningUntilRetrySucceedsAsync()
     {
+        // Arrange
         var session = new FakeTranslationSession();
         session.EnqueueStopBehavior(() =>
         {
@@ -70,19 +73,19 @@ public class DesktopTranslationControllerTests
         session.EnqueueDisposeBehavior(() => ValueTask.CompletedTask);
         var controller = CreateController(session);
 
+        // Act
         await controller.StartAsync(new SpeechCredentials("japaneast", "test-key"), "en-US", "ja-JP", new NoOpTranslationRecognizerWorker());
-        await FluentActions.Awaiting(() => controller.StopAsync())
-            .Should()
-            .ThrowAsync<InvalidOperationException>()
-            .WithMessage("dispose failed");
+        // Assert
+        var exception = await Assert.ThrowsAnyAsync<InvalidOperationException>(() => controller.StopAsync());
+        Assert.Equal("dispose failed", exception.Message, ignoreCase: true);
 
-        controller.IsRunning.Should().BeTrue();
-        session.DisposeCallCount.Should().Be(1);
+        Assert.True(controller.IsRunning);
+        Assert.Equal(1, session.DisposeCallCount);
 
         await controller.StopAsync();
 
-        controller.IsRunning.Should().BeFalse();
-        session.DisposeCallCount.Should().Be(2);
+        Assert.False(controller.IsRunning);
+        Assert.Equal(2, session.DisposeCallCount);
     }
 
     private static DesktopTranslationController CreateController(ITranslationSession session)

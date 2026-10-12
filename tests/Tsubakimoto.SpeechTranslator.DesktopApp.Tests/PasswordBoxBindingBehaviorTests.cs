@@ -1,6 +1,7 @@
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.Windows.Controls;
 using System.Windows.Data;
+
 using Tsubakimoto.SpeechTranslator.DesktopApp.Behaviors;
 
 namespace Tsubakimoto.SpeechTranslator.DesktopApp.Tests;
@@ -8,50 +9,59 @@ namespace Tsubakimoto.SpeechTranslator.DesktopApp.Tests;
 public class PasswordBoxBindingBehaviorTests
 {
     [Fact]
-    public async Task BoundPassword_WhenInitialValueIsEmpty_UpdatesSourceAndRaisesPropertyChangedOnUserInput()
+    public async Task BoundPassword_WhenInitialValueIsEmpty_UpdatesSourceAndRaisesPropertyChangedOnUserInputAsync()
     {
         await RunOnStaThreadAsync(() =>
         {
+            // Arrange
             var source = new BindableSecret();
             var changedProperties = new List<string?>();
             source.PropertyChanged += (_, e) => changedProperties.Add(e.PropertyName);
             var passwordBox = CreateBoundPasswordBox(source);
 
+            // Act
             passwordBox.Password = "entered-key";
 
-            source.Secret.Should().Be("entered-key");
-            changedProperties.Should().Contain(nameof(BindableSecret.Secret));
+            // Assert
+            Assert.Equal("entered-key", source.Secret);
+            Assert.Contains(nameof(BindableSecret.Secret), changedProperties);
         });
     }
 
     [Fact]
-    public async Task BoundPassword_WhenSourceChanges_UpdatesPasswordBox()
+    public async Task BoundPassword_WhenSourceChanges_UpdatesPasswordBoxAsync()
     {
         await RunOnStaThreadAsync(() =>
         {
+            // Arrange
             var source = new BindableSecret();
             var passwordBox = CreateBoundPasswordBox(source);
 
+            // Act
             source.Secret = "loaded-key";
 
-            passwordBox.Password.Should().Be("loaded-key");
+            // Assert
+            Assert.Equal("loaded-key", passwordBox.Password);
         });
     }
 
     [Fact]
-    public async Task BoundPassword_WhenPasswordIsCleared_UpdatesSourceToEmpty()
+    public async Task BoundPassword_WhenPasswordIsCleared_UpdatesSourceToEmptyAsync()
     {
         await RunOnStaThreadAsync(() =>
         {
+            // Arrange
             var source = new BindableSecret { Secret = "loaded-key" };
             var changedProperties = new List<string?>();
             source.PropertyChanged += (_, e) => changedProperties.Add(e.PropertyName);
             var passwordBox = CreateBoundPasswordBox(source);
 
+            // Act
             passwordBox.Password = string.Empty;
 
-            source.Secret.Should().BeEmpty();
-            changedProperties.Should().Contain(nameof(BindableSecret.Secret));
+            // Assert
+            Assert.Empty(source.Secret);
+            Assert.Contains(nameof(BindableSecret.Secret), changedProperties);
         });
     }
 

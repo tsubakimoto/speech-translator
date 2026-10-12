@@ -1,4 +1,4 @@
-using Tsubakimoto.SpeechTranslator.DesktopApp.Services;
+﻿using Tsubakimoto.SpeechTranslator.DesktopApp.Services;
 
 namespace Tsubakimoto.SpeechTranslator.DesktopApp.Tests;
 
@@ -7,6 +7,7 @@ public class EnvironmentSpeechCredentialsProviderTests
     [Fact]
     public void GetCredentials_BothValuesPresent_ReturnsCredentials()
     {
+        // Arrange
         var provider = new EnvironmentSpeechCredentialsProvider(name => name switch
         {
             "SPEECH_REGION" => "japaneast",
@@ -14,17 +15,20 @@ public class EnvironmentSpeechCredentialsProviderTests
             _ => null
         });
 
+        // Act
         var result = provider.GetCredentials();
 
-        result.IsValid.Should().BeTrue();
-        result.Credentials.Should().NotBeNull();
-        result.Credentials!.Region.Should().Be("japaneast");
-        result.Credentials.Key.Should().Be("test-key");
+        // Assert
+        Assert.True(result.IsValid);
+        Assert.NotNull(result.Credentials);
+        Assert.Equal("japaneast", result.Credentials!.Region);
+        Assert.Equal("test-key", result.Credentials.Key);
     }
 
     [Fact]
     public void GetCredentials_PrefersConfiguredValuesOverEnvironmentVariables()
     {
+        // Arrange
         var provider = new EnvironmentSpeechCredentialsProvider(name => name switch
         {
             "SPEECH_REGION" => "env-region",
@@ -32,17 +36,20 @@ public class EnvironmentSpeechCredentialsProviderTests
             _ => null
         });
 
+        // Act
         var result = provider.GetCredentials("configured-region", "configured-key");
 
-        result.IsValid.Should().BeTrue();
-        result.Credentials.Should().NotBeNull();
-        result.Credentials!.Region.Should().Be("configured-region");
-        result.Credentials.Key.Should().Be("configured-key");
+        // Assert
+        Assert.True(result.IsValid);
+        Assert.NotNull(result.Credentials);
+        Assert.Equal("configured-region", result.Credentials!.Region);
+        Assert.Equal("configured-key", result.Credentials.Key);
     }
 
     [Fact]
     public void GetCredentials_WhenConfiguredValuesMissing_FallsBackToEnvironmentVariables()
     {
+        // Arrange
         var provider = new EnvironmentSpeechCredentialsProvider(name => name switch
         {
             "SPEECH_REGION" => "env-region",
@@ -50,12 +57,14 @@ public class EnvironmentSpeechCredentialsProviderTests
             _ => null
         });
 
+        // Act
         var result = provider.GetCredentials("", null);
 
-        result.IsValid.Should().BeTrue();
-        result.Credentials.Should().NotBeNull();
-        result.Credentials!.Region.Should().Be("env-region");
-        result.Credentials.Key.Should().Be("env-key");
+        // Assert
+        Assert.True(result.IsValid);
+        Assert.NotNull(result.Credentials);
+        Assert.Equal("env-region", result.Credentials!.Region);
+        Assert.Equal("env-key", result.Credentials.Key);
     }
 
     [Theory]
@@ -64,6 +73,7 @@ public class EnvironmentSpeechCredentialsProviderTests
     [InlineData(null, null, "SPEECH_REGION, SPEECH_KEY")]
     public void GetCredentials_MissingValues_ReturnsError(string? region, string? key, string expected)
     {
+        // Arrange
         var provider = new EnvironmentSpeechCredentialsProvider(name => name switch
         {
             "SPEECH_REGION" => region,
@@ -71,9 +81,11 @@ public class EnvironmentSpeechCredentialsProviderTests
             _ => null
         });
 
+        // Act
         var result = provider.GetCredentials();
 
-        result.IsValid.Should().BeFalse();
-        result.ErrorMessage.Should().Contain(expected);
+        // Assert
+        Assert.False(result.IsValid);
+        Assert.Contains(expected, result.ErrorMessage);
     }
 }
