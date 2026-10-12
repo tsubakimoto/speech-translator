@@ -6,8 +6,6 @@ on:
     paths:
       - 'src/**'
       - 'tests/**'
-      - 'speech-translator.slnx'
-      - '**/*.sln'
       - '**/*.slnx'
       - '**/Directory.Build.props'
       - '**/Directory.Build.targets'
@@ -21,8 +19,6 @@ on:
     paths:
       - 'src/**'
       - 'tests/**'
-      - 'speech-translator.slnx'
-      - '**/*.sln'
       - '**/*.slnx'
       - '**/Directory.Build.props'
       - '**/Directory.Build.targets'
@@ -53,9 +49,7 @@ jobs:
     - name: Setup .NET
       uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
       with:
-        dotnet-version: |
-          10.0.401
-          10.0.x
+        global-json-file: global.json
 
     - name: Get version
       id: version
